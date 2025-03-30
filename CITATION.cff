@@ -1,0 +1,93 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+message: >-
+  The metadata for my thesis is still up for revision,
+  as it is being processed by the University of Edinburgh.
+title: "Source for Propositions As Sessions Taken Apart"
+authors:
+  - given-names: "Wen"
+    family-names: "Kokke"
+    orcid: "https://orcid.org/0000-0002-1662-0381"
+    affiliation: "University of Edinburgh"
+type: "software"
+license: "AGPL-3.0-only"
+commit: "95f03fdf216431fa3bf2ed553ca14c3e2f89552b"
+version: "1.0.0"
+date-released: "2025-03-31"
+preferred-citation:
+  title: "Propositions As Sessions Taken Apart"
+  authors:
+    - given-names: "Wen"
+      family-names: "Kokke"
+      orcid: "https://orcid.org/0000-0002-1662-0381"
+      affiliation: "University of Edinburgh"
+  type: "thesis"
+  thesis-type: "PhD thesis"
+  year: "2024"
+  institution:
+    name: "University of Edinburgh"
+    city: "Edinburgh"
+    country: "GB"
+  department: "Laboratory for Foundations of Computer Science"
+  license: "CC-BY-NC-SA-4.0"
+  abstract: >
+    The foundations of functional programming are built on the
+    λ-calculus, a powerful model of computation whose
+    canonicity is affirmed by its correspondence with
+    intuitionistic logic.  The foundations of concurrent
+    computation are built on less firm ground.  There is a
+    wide variety of process calculi, but none enjoy the same
+    canonicity as the λ-calculus, nor an exact correspondence
+    with logic.  Since its inception by Girard [1987],
+    Classical Linear Logic has been believed to have some
+    relation to concurrent computation, which has spawned a
+    wealth of research in both logic and programming language
+    theory.
+
+    This thesis continues the work towards a foundation for
+    concurrent computation, starting from the
+    propositions-as-sessions correspondence proposed by Wadler
+    [2012].  Drawing on the work of Abramsky [1994], Bellin
+    and Scott [1994], and Caires and Pfenning [2010], among
+    others, Wadler proposed the process calculus CP, which has
+    an exact correspondence with Classical Linear Logic. 
+    Drawing on the work of Honda [1993], Honda et al. [1998],
+    and Gay and Vasconcelos [2010], among others, Wadler
+    proposed the session-typed functional language GV, which
+    provides a practical foundation for session-typed
+    concurrency in functional languages.  Finally, Wadler
+    connects GV and CP by means of an operational
+    correspondence, and, thereby, connects practice of
+    session-typed concurrency to Classical Linear Logic.
+
+    This thesis provides an in-depth study of the
+    propositions-as-sessions correspondence proposed by
+    Wadler, highlighting its strengths and repairing a number
+    of its shortcomings.  Due to its adoption of commuting
+    conversions, Wadler's CP is non-confluent, and its
+    semantics are difficult to realise using the abstractions
+    of concurrent computation it purports to model.  I address
+    this shortcoming by removing the commuting conversions,
+    and showing that the resulting process calculus is
+    well-behaved and retains its connection to linear logic. 
+    Due to its lack of a parallel composition operator,
+    Wadler's CP is ill-suited to an analysis using standard
+    concurrency theory.  Wadler's GV lacks an operational
+    semantics and accounts of polymorphism and replication,
+    which were provided by Lindley and Morris [2014; 2015;
+    2016b].  Unfortunately, Lindley and Morris' GV suffers
+    from similar problems as CP with regard to its treatment
+    of parallel composition, which complicates its
+    metatheory.  I address this shortcoming in both systems by
+    adding a parallel composition operator and showing that
+    the resulting calculus is well-behaved and correspond to a
+    hypersequential variant of Classical Linear Logic. 
+    Finally, I study Priority CP, a variant of Wadler's
+    propositions-as-sessions correspondence proposed by Dardha
+    and Gay [2018], which increases its expressivity at the
+    cost of its compositionality and correspondence to logic. 
+    As with CP, I remove the commuting conversions from
+    Priority CP, and complete the correspondence with Priority
+    GV, which is the analogous variant of GV.
