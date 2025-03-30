@@ -1,0 +1,167 @@
+verbosity: "ERROR"
+strip-comments: true
+standalone: true
+data-dir: "assets"
+resource-path: [".", "assets"]
+
+filters:
+  - "scripts/pandoc/include-files/include-files.lua"
+  - "scripts/pandoc/wenkokke/title_case/title_case.lua"
+  - "scripts/pandoc/wenkokke/embed_pdf/embed_pdf.lua"
+  - "scripts/pandoc/abstract-section/abstract-section.lua"
+  - "scripts/pandoc/wenkokke/theorem/theorem.lua"
+  - "scripts/pandoc/wenkokke/crossref/crossref.lua"
+  - "scripts/pandoc/wenkokke/foreign/foreign.lua"
+  - "scripts/pandoc/include-figures.lua"
+  - "scripts/pandoc/todo.lua"
+  - "scripts/pandoc/wenkokke/possessive_cite/possessive_cite.lua"
+
+cite-method: natbib
+
+top-level-division: "chapter"
+
+number-sections: true
+
+metadata:
+  title: "Propositions As Sessions Taken Apart"
+  title-meta: "Propositions As Sessions Taken Apart"
+  author: "Wen Kokke"
+  author-meta: "Wen Kokke"
+  submityear: "2024"
+  bibliography: "assets/bibliography.bib"
+  lang: "en_GB"
+  babel-lang: "british"
+  include-files-log: ".latexmk-cache/include-files.log"
+
+  # List of Acronyms
+  acronyms:
+    LL: Linear Logic
+    CLL: Classical Linear Logic
+    ILL: Intuitionistic Linear Logic
+    CP: Classical Processes
+    HCP: Hypersequent Classical Processes
+    HCLL: Hypersequent Classical Linear Logic
+    PCP: Priority Classical Processes
+    GV: Good Variation
+    GVC: Good Variation With Cut
+    HGV: Hypersequent Good Variation
+    HGV*: Fine-Grain Call-By-Value Hypersequent Good Variation
+    PGV: Priority Good Variation
+    EGV: Exceptional Good Variation
+    LAST: Linear Asynchronous Session Types
+    PCF: Programming Computable Functions
+    FST: System F with Session Types
+    PLL: Priority Linear Logic
+    πLL: π-calculus based on Linear Logic
+    CT: Classical Transitions
+    LTS: Label-Transition Semantics
+    FGV: Functional Good Variation
+    μCP: ...
+    μGV: Functional Good Variation ...
+    BV: Base System Virtual
+    LS: Local System for Linear Logic
+    Lπ: Linear π-calculus
+    πDILL: π-calculus based on DILL
+    DILL: Dual Intuitionistic Linear Logic
+    DiLL: Differential Linear Logic
+    MoCC: Model of Concurrent Computation
+    MoC: Model of Computation
+
+  # Set font to Noto:
+  mainfont: "Noto Serif"
+  sansfont: "Noto Sans"
+  monofont: "Noto Sans Mono"
+  mathfont: "Noto Sans Math"
+  fontsize: "12pt"
+
+  # Set the cache directory:
+  cache-dir: ".parcel-cache/pandoc"
+
+  # Automatically shift headers:
+  include-auto: true
+
+  # Set options for wordcount filter:
+  wordcount-target: 80000
+
+  # Set options for crossref filter:
+  crossref:
+    format:
+      convention:
+        name: ["convention", "conventions"]
+      corollary:
+        name: ["corollary", "corollaries"]
+      conjecture:
+        name: ["conjecture", "conjectures"]
+      definition:
+        name: ["definition", "definitions"]
+      example:
+        name: ["example", "examples"]
+      counterexample:
+        name: ["counterexample", "counterexamples"]
+      figure:
+        name: ["figure", "figures"]
+      lemma:
+        name: ["lemma", "lemmas"]
+      table:
+        name: ["table", "tables"]
+      theorem:
+        name: ["theorem", "theorems"]
+      proposition:
+        name: ["proposition", "propositions"]
+      remark:
+        name: ["remark", "remarks"]
+      Header:
+        - name: ["part", "parts"]
+        - name: ["chapter", "chapters"]
+        - name: ["§", "§§"]
+        - name: ["§", "§§"]
+        - name: ["§", "§§"]
+        - name: ["¶", "¶¶"]
+
+  # Set options for theorem filter:
+  theorem:
+    restatable: true
+    location:
+      summary: "inplace"
+      omitted: "omitted"
+      default: "inplace"
+
+  # Set options for abstract-section filter:
+  abstract-section:
+    section-identifiers:
+      - abstract
+      - declaration
+      - acknowledgements
+      - lay-summary
+
+  # Options used in the HTML template:
+  script: ["assets/index.js"]
+  style: ["assets/style.scss"]
+
+  # Options used in the LaTeX template:
+  toc: true
+  toc-title: "Table of Contents"
+  documentclass: "infthesis"
+  colorlinks: false
+  classoption:
+    - lfcs
+    - phd
+    - sansheadings
+    - leftchapter
+    - twoside
+    - openright
+    - 12pt
+    - notimes
+    - usequotes
+    - abbrevs
+    - singlespacing
+    - parskip
+    - romanprepages
+    - logo
+
+# Options used for compiling to PDF:
+pdf-engine: "latexmk"
+pdf-engine-opts:
+  - "-xelatex"
+  - "-bibtex-cond"
+  - "-output-directory=.parcel-cache/pandoc"

@@ -1,0 +1,5245 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Preamble
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Include packages:
+
+% Provide \eg, \ie, \etc:
+% NOTE: These commands are provided by infthesis.cls
+% \usepackage[UKenglish,all]{foreign}
+
+% Format 'Table of Contents' to match 'Abstract' et al:
+\usepackage{tocloft}
+\makeatletter
+\def\cfttoctitlefont{\mbox{}\hfill\@chapterfont\bfseries\LARGE}
+\def\cftaftertoctitle{\hfill}
+\makeatother
+\setlength{\cftbeforetoctitleskip}{1cm}
+\setlength{\cftaftertoctitleskip}{0pt}
+
+% Decrease space before Part entries in ToC:
+\setlength{\cftbeforepartskip}{0.95\cftbeforepartskip}
+
+% Disable end-of-line word hyphenation
+% \usepackage[none]{hyphenat}
+
+% Disincentivise end-of-line word hypenation
+\tolerance=9999
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\exhyphenpenalty=100
+% \hbadness=10000
+
+% Use RaggedRight document-wide
+% \usepackage[document]{ragged2e}
+
+% Typesetting & Symbols:
+\usepackage{cmll}
+\usepackage{microtype}
+\usepackage{soul}
+\usepackage{stmaryrd}
+% Lists & Tables:
+\usepackage{array}
+\usepackage{enumitem}
+% Graphics:
+\usepackage{tikz}
+% \usepackage{tikz-cd}
+\usetikzlibrary{angles,calc,decorations.markings,decorations.pathmorphing,positioning,quotes}
+% Theorems:
+\usepackage{amsthm,thmtools,thm-restate}
+\usepackage{mathpartir}
+\usepackage{bussproofs}
+% References
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+% Including PDFs:
+\usepackage{pdfpages}
+% LaTeX Programming:
+\usepackage{afterpage}
+\usepackage{etoolbox}
+\usepackage{mathcommand}
+\usepackage{relsize}
+\usepackage{scalerel}
+\usepackage{stackengine}
+\usepackage{xparse}
+\usepackage{xstring}
+
+% Add line numbers:
+% \usepackage[mathlines]{lineno}
+% \linenumbers
+% \allowdisplaybreaks
+
+% Hyperlink Nodes
+% https://tex.stackexchange.com/a/36111
+% \tikzset{
+%     hyperlink node/.style={
+%         alias=sourcenode,
+%         append after command={
+%             let \p1=(sourcenode.north west),
+%                 \p2=(sourcenode.south east),
+%                 \n1={\x2-\x1},
+%                 \n2={\y1-\y2} in
+%             node [inner sep=0pt, outer sep=0pt,anchor=north west,at=(\p1)] {\hyperlink{#1}{\XeTeXLinkBox{\phantom{\rule{\n1}{\n2}}}}}
+%                     %xelatex needs \XeTeXLinkBox, won't create a link unless it
+%                     %finds text --- rules don't work without \XeTeXLinkBox.
+%                     %Still builds correctly with pdflatex and lualatex
+%         }
+%     }
+% }
+
+% Possessive citations
+\makeatletter
+% make numeric styles use name format
+\patchcmd{\NAT@test}{\else \NAT@nm}{\else \NAT@nmfmt{\NAT@nm}}{}{}
+% define \citepos just like \citet
+\DeclareRobustCommand\citepos
+{\begingroup
+\let\NAT@nmfmt\NAT@posfmt% ...except with a different name format
+\NAT@swafalse\let\NAT@ctype\@ne\NAT@parfalse
+\@ifstar{\NAT@fulltrue\NAT@citetp}{\NAT@fullfalse\NAT@citetp}}
+\let\NAT@orig@nmfmt\NAT@nmfmt
+\def\NAT@posfmt#1{%
+	\StrRemoveBraces{#1}[\NAT@temp]%
+	\IfEndWith{\NAT@temp}{s}
+	{\NAT@orig@nmfmt{#1'}}
+	{\IfEndWith{\NAT@temp}{x}
+	{\NAT@orig@nmfmt{#1'}}
+	{\NAT@orig@nmfmt{#1's}}}}
+\makeatother
+
+% Cleveref with custom labels (via Fabrizio Montesi)
+\makeatletter
+\NewDocumentCommand{\customlabel}{O{0} m m m}{%
+	\protected@write\@auxout{}{\string\newlabel{#3}{{#4}{\thepage}{#4}{#3}{}}}%
+	\protected@write\@auxout{}{\string\newlabel{#3@cref}{{[#2][#1][#1]#4}{\thepage}}}}
+\makeatother
+
+% Include papers:
+\newcounter{includepdfpaper}
+\crefname{includepdfpaper}{paper}{papers}
+\newcounter{includepdfpaperpage}
+\crefname{Paper}{paper}{papers}
+\NewDocumentEnvironment{paper}{d[]}{%
+	\refstepcounter{includepdfpaper}%
+	\setcounter{includepdfpaperpage}{0}%
+	\includepdfset{%
+		pages={-},
+		fitpaper={true},
+		link={true},
+		linkname={paper:#1},
+		pagecommand={%
+				\IfValueT{#1}{%
+					\refstepcounter{includepdfpaperpage}%
+					\label[includepdfpaperpage]{paper:#1.\theincludepdfpaperpage}}%
+				\thispagestyle{empty}%
+			}}%
+	\let\oldsection\section%
+	\renewcommand{\section}[1]{%
+		\clearpage%
+		\thispagestyle{empty}%
+		\pagecolor{CarnationPink}%
+		\afterpage{\nopagecolor}%
+		\mbox{}%
+		\vfill%
+		\oldsection{Paper~\Roman{includepdfpaper}:~##1}%
+		\customlabel{Paper}{paper:#1}{\Roman{includepdfpaper}}
+		\hrulefill%
+		\let\section\oldsection}%
+}{%
+	\clearpage%
+	\thispagestyle{empty}%
+	\pagecolor{CarnationPink}%
+	\afterpage{\nopagecolor}%
+	\mbox{}%
+	\clearpage
+}
+
+% References to papers:
+% \ExplSyntaxOn
+% \prop_new:N \l_paper_index_to_label_prop%
+% \prop_set_from_keyval:Nn \l_paper_index_to_label_prop {
+%   1=paper:separating-sessions-smoothly,
+%   2=paper:prioritise-the-best-variation
+% }
+% % TODO: If I figure out how to trigger recompilation,
+% %       then I could extend \paper to call \putpaperlabel.
+% \str_new:N \l_paper_index_temp_str%
+% \str_new:N \l_paper_label_temp_str%
+% \cs_set:Npn \paper_index_to_label:n #1 #2 {
+%   \str_set:Nn \l_paper_index_temp_str {#1}
+%   \prop_if_in:NVTF \l_paper_index_to_label_prop \l_paper_index_temp_str {
+%     \exp_args:NNV
+%       \prop_item:Nn \l_paper_index_to_label_prop \l_paper_index_temp_str
+%   } {
+%     \PackageError{includepdfpaper}{Unknown paper '#1'}{}%
+%   }
+% }
+% \NewDocumentCommand{\paperref}{m}{%
+%   \str_set:Nn \l_paper_label_temp_str {\paper_index_to_label:n{#1}.1}%
+%   \exp_args:Nxx \hyperlink {\l_paper_label_temp_str} {Paper~\uppercase{\int_to_roman:n{#1}}}}
+% \NewDocumentCommand{\paperpageref}{m m m}{%
+%   \str_set:Nn \l_paper_label_temp_str {\paper_index_to_label:n{#1}}%
+%   \exp_args:Nxx \hyperlink {\l_paper_label_temp_str.#2} {\uppercase{\int_to_roman:n{#1}}.#3}}
+% \ExplSyntaxOff
+
+% Allow page breaks in math mode:
+\allowdisplaybreaks%
+
+% Configure description lists.
+\setlist[description]{style=nextline}
+
+% Don't number subsubsections:
+\setcounter{secnumdepth}{2}
+
+% Set up bussproofs:
+\EnableBpAbbreviations
+
+% Formatting for rule names
+\newcommandPIE\RuleName[1]{\ensuremath{\textsc{#1}#2#3#4}}
+
+% Formatting for headers in LTS figures
+\newcommand{\headerrule}[1]{%
+	\rule{0.075\linewidth}{0.25pt}\text{ #1 }\hrulefill}
+
+% Strikeout in math mode:
+\newcommand\mathst[2][black]{%
+	\setbox0=\hbox{$#2$}%
+	\rlap%
+	{\ensuremath{#2}}%
+	{\raisebox{0.5ex-0.5pt}{\textcolor{#1}{\rule{\wd0}{1pt}}}}}
+
+% Custom labels for rules
+\NewDocumentCommand{\RuleLabel}{O{\textsc} m o m}{%
+	\IfValueTF{#3}{%
+		\customlabel{Rule}{rule:#2-#4}{#1{#3}}%
+		\hypertarget{rule:#2-#4}{#1{#3}}}{%
+		\customlabel{Rule}{rule:#2-#4}{#1{#4}}%
+		\hypertarget{rule:#2-#4}{#1{#4}}}}
+\crefname{Rule}{rule}{rules}
+\Crefname{Rule}{Rule}{Rules}
+
+% Variants of xrightarrow and xleftrightarrow with less vertical space:
+\newcommand{\altxrightarrow}[2][0pt]{%
+	\mathrel{%
+		\ensurestackMath{%
+			\stackengine{%
+				\dimexpr#1-8pt}{%
+				\xrightarrow{\phantom{#2}}}{%
+				\scriptstyle#2}%
+			{O}{c}{F}{F}{S}}}}
+\newcommand{\altxleftrightarrow}[2][0pt]{%
+	\mathrel{%
+		\smash{%
+			\ensurestackMath{%
+				\stackengine%
+				{\dimexpr#1-10pt}%
+				{\xleftrightarrow{\hphantom{#2}\vphantom{\scriptstyle\bar{x}}}}%
+				{\scriptstyle#2}%
+				{O}{c}{F}{F}{S}}}}}
+\NewDocumentCommand{\xequiv}{t/ m}{%
+	\mathrel{%
+		\smash{%
+			\ensurestackMath{%
+				\stackinset{c}{}{c}{+0.8ex}{\scalebox{0.40}{\bf#2}}{%
+					\stackinset{c}{}{c}{-0.15ex}{\IfBooleanTF{#1}{\not\equiv}{\equiv}}{%
+						\phantom{\IfBooleanTF{#1}{\not\equiv}{\equiv}}}%
+	}}}}}
+\def\equivS{\xequiv{S}}
+\def\nequivS{\xequiv/{S}}
+\def\equivLP{\xequiv{L}}
+\def\nequivLP{\xequiv/{L}}
+\def\equivD{\xequiv{D}}
+\def\nequivD{\xequiv/{D}}
+\def\equivLPS{\xequiv{LS}}
+\def\nequivLPS{\xequiv/{LS}}
+
+%%% Environment for rules with labels
+\NewDocumentEnvironment{RuleWithLabel}{s O{\textsc} m m d[] +b}{
+	\!\!%
+	\array{l}
+	\IfBooleanTF{#1}{%
+		\Rule{#3-#4}%
+	}{%
+		\IfValueTF{#5}{%
+			\RuleLabel[#2]{#3}[#5]{#4}%
+		}{%
+			\RuleLabel[#2]{#3}{#4}%
+		}%
+	}%
+	\\%
+	#6%
+}{%
+	\endarray%
+}
+
+%%% References to rules
+\ExplSyntaxOn
+\str_new:N \l_rule_name_temp_str%
+\prop_new:N \l_rule_hypertarget_prop%
+\prop_new:N \l_rule_name_prop%
+
+\NewDocumentCommand{\RuleLabelAlias}{O{\textsc} m o m m}{%
+	\IfValueTF{#3}{%
+		\prop_put:Nnn \l_rule_name_prop {rule:#2-#4} {#1{#3}}%
+		\prop_put:Nnn \l_rule_hypertarget_prop {rule:#2-#4} {#5}%
+	}{%
+		\prop_put:Nnn \l_rule_name_prop {rule:#2-#4} {#1{#4}}%
+		\prop_put:Nnn \l_rule_hypertarget_prop {rule:#2-#4} {#5}%
+	}}
+\NewDocumentCommand{\Rule}{m}{%
+	\str_set:Nn \l_rule_name_temp_str {rule:#1}
+	\prop_if_in:NVTF \l_rule_name_prop \l_rule_name_temp_str {%
+		\hyperlink{%
+			\prop_item:Nn \l_rule_hypertarget_prop {rule:#1}}{%
+			\prop_item:Nn \l_rule_name_prop {rule:#1}}%
+	}{%
+		\labelcref{rule:#1}%
+	}%
+}
+% \newcommand{\Rule}[1]{\TryRule{#1}{\labelcref{rule:#1}}}
+\NewDocumentCommand{\RuleInv}{m}{\Rule{#1}\textsuperscript{-1}}
+
+% Define proof environments:
+\declaretheorem[name=Theorem,within=chapter]{theorem}
+\declaretheorem[sibling=theorem,name=Assumption]{assumption}
+\declaretheorem[sibling=theorem,name=Claim]{claim}
+\declaretheorem[sibling=theorem,name=Conjecture]{conjecture}
+\declaretheorem[sibling=theorem,name=Convention]{convention}
+\declaretheorem[sibling=theorem,name=Corollary]{corollary}
+\declaretheorem[sibling=theorem,name=Definition]{definition}
+\declaretheorem[sibling=theorem,name=Example]{example}
+\declaretheorem[sibling=theorem,name=Lemma]{lemma}
+\declaretheorem[sibling=theorem,name=Proposition]{proposition}
+\declaretheorem[sibling=theorem,name=Counterexample]{counterexample}
+\declaretheorem[sibling=theorem,name=Remark]{remark}
+% proof is defined by amsthm
+
+% `\IfSingleTF`: Does the element consist of a single token?
+\ExplSyntaxOn
+\cs_new_eq:NN \IfSingleTF \tl_if_single:nTF
+\ExplSyntaxOff
+
+% Define TODO environment & \inlineTODO command
+\colorlet{todomaincolor}{BrickRed}
+\colorlet{todotextcolor}{todomaincolor!75!black}
+\colorlet{todopagecolor}{todotextcolor!20}
+\newenvironment{TODO}{%
+	\def\FrameCommand{
+		\color{todotextcolor}\vrule width 3pt%
+		\fboxsep=\FrameSep
+		\colorbox{todopagecolor}
+	}%
+	\MakeFramed{\FrameRestore}%
+	{\bfseries TODO}:
+}{%
+	\endMakeFramed%
+}
+\newcommand{\inlineTODO}[1]{%
+	{\color{todotextcolor}\vrule width 3pt}%
+	\fboxsep=\FrameSep
+	\colorbox{todopagecolor}{%
+		\parbox{%
+			\dimexpr\linewidth-2\fboxsep%
+		}{%
+			\strut%
+			\color{todotextcolor}
+			{\bfseries TODO}: #1%
+			\strut%
+		}}%
+	\par%
+}
+
+% Downward shifting arrows
+\newcommand{\Drsh}{\mathop{\mathchoice%
+		{\rotatebox[origin=c]{180}{$\Lsh$}}%
+		{\rotatebox[origin=c]{180}{$\Lsh$}}%
+		{\rotatebox[origin=c]{180}{$\scriptstyle\Lsh$}}%
+		{\rotatebox[origin=c]{180}{$\scriptscriptstyle\Lsh$}}}}
+\newcommand{\Dlsh}{\mathop{\mathchoice%
+		{\rotatebox[origin=c]{180}{$\Rsh$}}%
+		{\rotatebox[origin=c]{180}{$\Rsh$}}%
+		{\rotatebox[origin=c]{180}{$\scriptstyle\Rsh$}}%
+		{\rotatebox[origin=c]{180}{$\scriptscriptstyle\Rsh$}}}}
+
+%% Up and down squiggly arrow
+\newcommand{\upsquigarrow}{\mathbin{\mathchoice%
+		{\rotatebox[origin=c]{90}{$\rightsquigarrow$}}%
+		{\rotatebox[origin=c]{90}{$\rightsquigarrow$}}%
+		{\rotatebox[origin=c]{90}{$\scriptstyle\rightsquigarrow$}}%
+		{\rotatebox[origin=c]{90}{$\scriptscriptstyle\rightsquigarrow$}}}}
+\newcommand{\downsquigarrow}{\mathbin{\mathchoice%
+		{\rotatebox[origin=c]{270}{$\rightsquigarrow$}}%
+		{\rotatebox[origin=c]{270}{$\rightsquigarrow$}}%
+		{\rotatebox[origin=c]{270}{$\scriptstyle\rightsquigarrow$}}%
+		{\rotatebox[origin=c]{270}{$\scriptscriptstyle\rightsquigarrow$}}}}
+
+% Graphs
+\newcommand{\edge}[2]{#1#2}
+\newcommand{\arc}[2]{\overrightarrow{#1#2}}
+\newcommand{\disjoint}[1][]{\mathrel{\parallel_{#1}}}
+\newcommand{\reaches}[1][]{\mathrel{\prec_{#1}}}
+\newcommand{\reacheseq}[1][]{\mathrel{\preccurlyeq_{#1}}}
+\newcommand{\nreaches}[1][]{\mathrel{\nprec_{#1}}}
+\newcommand{\nreacheseq}[1][]{\mathrel{\npreccurlyeq_{#1}}}
+\NewDocumentCommand{\vertices}{o d()}{%
+	V\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+\NewDocumentCommand{\edges}{e{^} o d()}{%
+	E\IfValueT{#1}{^{#1}}\IfValueT{#2}{_{#2}}\IfValueT{#3}{(#3)}}
+\NewDocumentCommand{\arcs}{o d()}{%
+	A\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+\NewDocumentCommand{\edgeLabelling}{o d()}{%
+	\ell\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+\NewDocumentCommand{\arcLabelling}{o d()}{%
+	\ell\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+\NewDocumentCommand{\edgeLabels}{o d()}{%
+	\mathcal{L}\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+\NewDocumentCommand{\arcLabels}{o d()}{%
+	\mathcal{L}\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+\NewDocumentCommand{\edgeNames}{o d()}{%
+	\mathcal{E}\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+\NewDocumentCommand{\edgeConnections}{o d()}{%
+	r\IfValueT{#1}{_{#1}}\IfValueT{#2}{(#2)}}
+
+% Names
+% \newcommand{\Zplus}{\mathbb{Z}^+}
+\newcommand{\domainminus}{%
+	\mathbin{
+		\ooalign{%
+			\ensuremath{\triangleleft}%
+			\cr\hidewidth%
+			\scalebox{1.1}[1]{\ensuremath{-}}%
+			\hidewidth\cr}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Syntax Highlighting
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 1. blue (RoyalBlue), sans-serif;
+% 2. red (RedOrange), bold, with-serif;
+% 3. emerald (Emerald), italic, with-serif ;
+% 4. pink (CarnationPink), underlined, sans-serif;
+% 5. orange (YellowOrange), monospaced, with-serif.
+
+\NewDocumentCommand{\shset}{m}{
+	\piset{#1}%
+	\cpset{#1}%
+	\gvset{#1}%
+	\lmset{#1}%
+	\mpset{#1}%
+	\hpset{#1}%
+	\ppset{#1}%
+	\ptset{#1}%
+}
+
+\colorlet{typrimarycolor}{RoyalBlue}
+\colorlet{tmprimarycolor}{RedOrange}
+\colorlet{prprimarycolor}{YellowOrange}
+\colorlet{tysecondarycolor}{Emerald}
+\colorlet{tmsecondarycolor}{CarnationPink}
+\colorlet{prsecondarycolor}{Periwinkle}
+
+\def\mathtyprimarystyle[#1]#2{#1{\mathsf{#2}}}
+\def\mathtmprimarystyle[#1]#2{#1{\mathsf{#2}}}
+\def\mathprprimarystyle[#1]#2{#1{\mathsf{#2}}}
+\def\mathtysecondarystyle[#1]#2{#1{\mathrm{\mathit{#2}}}}
+\def\mathtmsecondarystyle[#1]#2{#1{\mathrm{\mathit{#2}}}}
+\def\mathprsecondarystyle[#1]#2{#1{\mathrm{\mathit{#2}}}}
+
+\def\mathtyprimarycolor[#1]{\color{typrimarycolor}#1}
+\def\mathtmprimarycolor[#1]{\color{tmprimarycolor}#1}
+\def\mathprprimarycolor[#1]{\color{prprimarycolor}#1}
+\def\mathtysecondarycolor[#1]{\color{tysecondarycolor}#1}
+\def\mathtmsecondarycolor[#1]{\color{tmsecondarycolor}#1}
+\def\mathprsecondarycolor[#1]{\color{prsecondarycolor}#1}
+
+\newcommand{\mathtyprimary}[2][\mathord]{%
+	\mathtyprimarystyle[#1]{\mathtyprimarycolor[#2]}}
+\newcommand{\mathtmprimary}[2][\mathord]{%
+	\mathtmprimarystyle[#1]{\mathtmprimarycolor[#2]}}
+\newcommand{\mathprprimary}[2][\mathord]{%
+	\mathprprimarystyle[#1]{\mathprprimarycolor[#2]}}
+\newcommand{\mathtysecondary}[2][\mathord]{%
+	\mathtysecondarystyle[#1]{\mathtysecondarycolor[#2]}}
+\newcommand{\mathtmsecondary}[2][\mathord]{%
+	\mathtmsecondarystyle[#1]{\mathtmsecondarycolor[#2]}}
+\newcommand{\mathprsecondary}[2][\mathord]{%
+	\mathprsecondarystyle[#1]{\mathprsecondarycolor[#2]}}
+
+\def\texttyprimarystyle[#1]{\textsf{#1}}
+\def\texttmprimarystyle[#1]{\textsf{#1}}
+\def\textprprimarystyle[#1]{\textsf{#1}}
+\def\texttysecondarystyle[#1]{\textrm{\textit{#1}}}
+\def\texttmsecondarystyle[#1]{\textrm{\textit{#1}}}
+\def\textprsecondarystyle[#1]{\textrm{\textit{#1}}}
+
+\def\texttyprimarycolor[#1]{\textcolor{typrimarycolor}{#1}}
+\def\texttmprimarycolor[#1]{\textcolor{tmprimarycolor}{#1}}
+\def\textprprimarycolor[#1]{\textcolor{prprimarycolor}{#1}}
+\def\texttysecondarycolor[#1]{\textcolor{tysecondarycolor}{#1}}
+\def\texttmsecondarycolor[#1]{\textcolor{tmsecondarycolor}{#1}}
+\def\textprsecondarycolor[#1]{\textcolor{prsecondarycolor}{#1}}
+
+\newcommand{\texttyprimary}[1]{%
+	\texttyprimarystyle[{\texttyprimarycolor[{#1}]}]}
+\newcommand{\texttmprimary}[1]{%
+	\texttmprimarystyle[{\texttmprimarycolor[{#1}]}]}
+\newcommand{\textprprimary}[1]{%
+	\textprprimarystyle[{\textprprimarycolor[{#1}]}]}
+\newcommand{\texttysecondary}[1]{%
+	\texttysecondarystyle[{\texttysecondarycolor[{#1}]}]}
+\newcommand{\texttmsecondary}[1]{%
+	\texttmsecondarystyle[{\texttmsecondarycolor[{#1}]}]}
+\newcommand{\textprsecondary}[1]{%
+	\textprsecondarystyle[{\textprsecondarycolor[{#1}]}]}
+
+\def\typrimaryname{\texttyprimary{blue}}
+\def\tmprimaryname{\texttmprimary{red}}
+\def\prprimaryname{\textprprimary{yellow}}
+\def\tysecondaryname{\texttysecondary{green}}
+\def\tmsecondaryname{\texttmsecondary{pink}}
+\def\prsecondaryname{\textprsecondary{periwinkle}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Equality Proofs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommandPIE\hpEqR{\text{r}#1#2#3}
+\NewDocumentCommand{\hpEqC}{t' e{^} e{_}}{%
+	\text{c}%
+	\IfBooleanT{#1}{'}%
+	\IfValueT{#2}{^{#2}}%
+	\IfValueT{#3}{_{#3}}}
+\NewDocumentCommand{\hpEqS}{t' e{^} e{_}}{%
+	\text{s}%
+	\IfBooleanT{#1}{'}%
+	\IfValueT{#2}{^{#2}}%
+	\IfValueT{#3}{_{#3}}}
+\NewDocumentCommand{\hpEqT}{t' e{^} e{_}}{%
+	\text{t}%
+	\IfBooleanT{#1}{'}%
+	\IfValueT{#2}{^{#2}}%
+	\IfValueT{#3}{_{#3}}}
+\NewDocumentCommand{\hpEqP}{t' e{^} e{_}}{%
+	\text{p}%
+	\IfBooleanT{#1}{'}%
+	\IfValueT{#2}{^{#2}}%
+	\IfValueT{#3}{_{#3}}}
+\def\hpEqRefl{\text{Refl}}
+\NewDocumentCommand{\hpEqSymm}{d()}{\text{Symm}\IfValueT{#1}{(#1)}}
+\NewDocumentCommand{\hpEqTrans}{d()}{\text{Trans}\IfValueT{#1}{(#1)}}
+\NewDocumentCommand{\hpEqCong}{d()}{\text{Cong}\IfValueT{#1}{(#1)}}
+\def\hpEqLinkComm{\text{LinkComm}}
+\def\hpEqParNil{\text{ParNil}}
+\def\hpEqParComm{\text{ParComm}}
+\def\hpEqParAssoc{\text{ParAssoc}}
+\def\hpEqNewComm{\text{NewComm}}
+\def\hpEqNewAssoc{\text{NewAssoc}}
+\def\hpEqScopeExt{\text{ScopeExt}}
+% \def\hpEqRefl{\Rule{H-PSC-Refl}}
+% \NewDocumentCommand{\hpEqSymm}{d()}{\Rule{H-PSC-Symm}\IfValueT{#1}{(#1)}}
+% \NewDocumentCommand{\hpEqTrans}{d()}{\Rule{H-PSC-Trans}\IfValueT{#1}{(#1)}}
+% \NewDocumentCommand{\hpEqCong}{d()}{\Rule{H-PSC-Cong}\IfValueT{#1}{(#1)}}
+% \def\hpEqLinkComm{\Rule{H-PSC-LinkComm}}
+% \def\hpEqParNil{\Rule{H-PSC-ParNil}}
+% \def\hpEqParComm{\Rule{H-PSC-ParComm}}
+% \def\hpEqParAssoc{\Rule{H-PSC-ParAssoc}}
+% \def\hpEqNewComm{\Rule{H-PSC-NewComm}}
+% \def\hpEqNewAssoc{\Rule{H-PSC-NewAssoc}}
+% \def\hpEqScopeExt{\Rule{H-PSC-ScopeExt}}
+\def\hpEqProves{\mathrel{\Colon}}
+\def\hpEqEval{\mathrel{\Longrightarrow}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Generic Functions & Relations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\systemGLCW{GLCW\textsuperscript{$\to$}}
+
+% CLL Metavariables
+\newcommandPIE\llA[0]{A#1#2#3}
+\newcommandPIE\llB[0]{B#1#2#3}
+\newcommandPIE\llC[0]{C#1#2#3}
+\newcommandPIE\llD[0]{D#1#2#3}
+\newcommandPIE\llGG[0]{Γ#1#2#3}
+\newcommandPIE\llGD[0]{Δ#1#2#3}
+\newcommandPIE\llHG[0]{\mathcal{G}#1#2#3}
+\newcommandPIE\llHH[0]{\mathcal{H}#1#2#3}
+
+% CLL Propositions
+\def\llOne{\mathord{\mathbf{1}}}
+\def\llNil{\mathord{\mathbf{0}}}
+\def\llTop{\mathord{\top}}
+\def\llBot{\mathord{\bot}}
+\def\llImpl{\mathbin{\multimap}}
+\def\llBiImpl{\mathbin{\multimapboth}}
+\def\llTens{\mathbin{\otimes}}
+\def\llParr{\mathbin{\scaleobj{0.9}{\invampemu}}}
+\def\llPlus{\mathbin{\oplus}}
+\def\llWith{\mathbin{\scaleobj{0.9}{\&}}}
+\def\llHUnit{\mathord{\varnothing}}
+\def\llSUnit{%
+	\mathord{%
+		\ensurestackMath{%
+			\stackengine{0pt}{\hphantom{\llHUnit}}{\cdot}{O}{c}{F}{T}{S}}}}
+
+% CLL Structures
+\def\llSeq{\mathrel{\vdash}}
+\def\llSBot{\mathord{\varnothing}}
+\def\llSParr{\mathpunct{,}}
+\NewDocumentCommand{\llPlug}{d[]}{\mathord{[#1]}}
+
+% HCLL Structures
+\def\llHOne{\mathord{\circ}}
+\def\llHTens{\mathbin{\parallel}}
+
+% Duality
+\newcommand{\co}[1]{\overline{#1}}
+
+% \NewDocumentCommand{\channelSplit}{m m m m}{c_S(#1,#2,#3,#4)}
+% \NewDocumentCommand{\channelLeft}{m m m m}{c_L(#1,#2,#3,#4)}
+% \NewDocumentCommand{\channelRight}{m m m m}{c_R(#1,#2,#3,#4)}
+\NewDocumentCommand{\channelSplit}{m m m m}{%
+	#1\mathrel{{}_{#2}{\parallel}{}_{#3}}#4}
+\NewDocumentCommand{\channelLeft}{m m m m}{%
+	#1\mathrel{{}_{#2#3}{\parallel}}#4}
+\NewDocumentCommand{\channelRight}{m m m m}{%
+	#1\mathrel{{\parallel}{}_{#2#3}}#4}
+\DeclareMathOperator{\blocked}{blocked}
+\DeclareMathOperator{\blocking}{blocking}
+\DeclareMathOperator{\canonical}{canonical}
+\DeclareMathOperator{\deadlock}{deadlock}
+\DeclareMathOperator{\fn}{fn}
+\DeclareMathOperator{\bn}{bn}
+\DeclareMathOperator{\dn}{dn}
+\DeclareMathOperator{\fp}{fp}
+\DeclareMathOperator{\bp}{bp}
+% \DeclareMathOperator{\dp}{dp}
+\DeclareMathOperator{\sources}{sources}
+\DeclareMathOperator{\sinks}{sinks}
+\DeclareMathOperator{\prefix}{prefix}
+\DeclareMathOperator{\envs}{envs}
+
+\def\bijection{\leftrightarrow}
+\def\nimplies{\not\Rightarrow}
+\DeclareMathOperator{\dom}{dom}
+\DeclareMathOperator{\cod}{cod}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\ready}{ready}
+\def\defeq{\triangleq}
+% \newcommand{\defeq}[1][0pt]{%
+%   \mathrel{%
+%     \smash{%
+%       \ensurestackMath{%
+%         \stackengine%
+%         {\dimexpr#1+2pt}%
+%         {=}%
+%         {\scalebox{.4}{\text{\sf\bfseries def}}}%
+%         {O}{c}{F}{F}{S}}}}}
+\newcommand{\relS}[0]{\mathrel{\mathcal{S}}}
+\newcommand{\dotsim}{\mathrel{\stackrel{\dot}{\sim}}}
+\newcommand{\dotsimeq}{\mathrel{\simeq^{c}}}
+\newcommand{\card}[1]{\lvert#1\rvert}
+\DeclareMathOperator{\readyOnOp}{ready}
+\newcommand{\readyOn}[2]{\readyOnOp(#1,#2)}
+\DeclareMathOperator{\isZapperOp}{zapper}
+\newcommand{\isZapper}[1]{\isZapperOp(#1)}
+\newcommand{\dual}[1][]{\mathrel{\sim_{#1}}}
+\newcommand{\ndual}[1][]{\mathrel{\nsim_{#1}}}
+\newcommand{\independent}[1][]{\mathrel{\parallel_{#1}}}
+\newcommand{\dependseq}[1][]{\mathrel{\succcurlyeq_{#1}}}
+\newcommand{\depends}[1][]{\mathrel{\succ_{#1}}}
+\newcommand{\ndependseq}[1][]{\mathrel{\nsucccurlyeq_{#1}}}
+\newcommand{\ndepends}[1][]{\mathrel{\nsucc_{#1}}}
+\DeclareMathOperator{\empireOp}{e}
+\NewDocumentCommand{\empire}{d[] d()}{%
+	{\empireOp}%
+	\IfValueT{#2}{%
+		\mathopen{}\left\lparen%
+		#2%
+		\IfValueT{#1}{%
+			\mathpunct{,}%
+			#1%
+		}%
+		\right\rparen\mathclose{}%
+	}}
+\DeclareMathOperator{\dependencyOp}{Dep}
+\NewDocumentCommand{\dependency}{d()}{%
+	\dependencyOp%
+	\IfValueT{#1}{\mathopen{}\left\lparen#1\right\rparen\mathclose{}}}
+\DeclareMathOperator{\priorityOp}{Pr}
+\NewDocumentCommand{\priority}{d()}{%
+	\priorityOp%
+	\IfValueT{#1}{\mathopen{}\left\lparen#1\right\rparen\mathclose{}}}
+\DeclareMathOperator{\connectionOp}{Con}
+\NewDocumentCommand{\connection}{d()}{%
+	\connectionOp%
+	\IfValueT{#1}{\mathopen{}\left\lparen#1\right\rparen\mathclose{}}}
+\DeclareMathOperator{\processOp}{Proc}
+\NewDocumentCommand{\process}{d()}{%
+	\processOp%
+	\IfValueT{#1}{\mathopen{}\left\lparen#1\right\rparen\mathclose{}}}
+\DeclareMathOperator{\prOp}{pr}
+\NewDocumentCommand{\pr}{d()}{%
+	\prOp%
+	\IfValueT{#1}{\mathopen{}\left\lparen#1\right\rparen\mathclose{}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Multisets
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\DeclareMathOperator{\msfn}{\underline{\fn}}
+\DeclareMathOperator{\msbn}{\underline{\bn}}
+\newcommand{\msmfn}[1]{\msm_{\fn(#1)}}
+\newcommand\msX{\mathcal{X}}
+\newcommand\msY{\mathcal{Y}}
+\newcommand\msm{\mathop{μ}}
+\def\symdiff{\mathbin{\triangle}}
+\newcommand{\msToSet}[1]{#1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Translations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\lwiggle{\mathopen{⧘}}%
+\def\rwiggle{\mathclose{⧙}}%
+\def\llwiggle{\mathopen{⧚\mkern1.0mu}}%
+\def\rrwiggle{\mathclose{\mkern1.25mu⧛}}%
+\def\fission{⎵}%{¦}%{⌴}%{¦}%{⎵}
+\def\iotf{\text{ is of the form }}
+
+\NewDocumentCommand{\CtoPi}{d()}{%
+	% \mathop{\downarrow_{π}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\piabbrev}}%
+}
+\NewDocumentCommand{\CtoH}{d()}{%
+	% \mathop{\downarrow_{H}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\hpabbrev}}%
+}
+\NewDocumentCommand{\MtoH}{d()}{%
+	% \mathop{\downarrow_{H}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\hpabbrev}}%
+}
+\NewDocumentCommand{\HtoC}{d()}{%
+	% \mathop{\downarrow_{C}}\IfValueT{#1}{#1}%
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\cpabbrev}}%
+}
+\NewDocumentCommand{\HtoM}{d()}{%
+	% \mathop{\hpBigDis_{C}}\IfValueT{#1}{#1}%
+	% \mathopen{\llwiggle}
+	% \IfValueTF{#1}{#1}{\cdot}%
+	% \mathclose{\rrwiggle_{\mpabbrev}}%
+	\mathopen{\llbracket}
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\mpabbrev}}%
+}
+\NewDocumentCommand{\DisHtoM}{d()}{%
+	\mathopen{\lbrack\mkern-4.0mu\lwiggle\mkern1.0mu}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\mkern1.0mu\rwiggle\mkern-4.0mu\rbrack_{\mpabbrev}}%
+}
+\NewDocumentCommand{\CtoCPI}{d()}{%
+	% \mathop{\downarrow_{H}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\ptrabbrev}}%
+}
+\NewDocumentCommand{\HtoPI}{d()}{%
+	% \mathop{\downarrow_{H}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\ptabbrev}}%
+}
+\NewDocumentCommand{\PtoPI}{d()}{%
+	\mathopen{\lfloor}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rfloor_{\ptabbrev}}%
+}
+\NewDocumentCommand{\CtoP}{d()}{%
+	% \mathop{\downarrow_{H}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\ppabbrev}}%
+}
+\NewDocumentCommand{\GtoLM}{d()}{%
+	% \mathop{\downarrow_{H}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\lmabbrev}}%
+}
+\NewDocumentCommand{\LMtoG}{d() e{^}}{%
+	% \mathop{\downarrow_{H}}\IfValueT{#1}{#1}
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket_{\gvabbrev}\IfValueT{#2}{^{#2}}}%
+}
+\NewDocumentCommand{\GTtoC}{d()}{%
+	\mathopen{\llceil}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrceil}}
+\NewDocumentCommand{\GStoC}{d()}{%
+	\mathopen{\llfloor}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrfloor}}
+\NewDocumentCommand{\GCtoC}{d() e{^}}{%
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket^{#2}_C}}
+\NewDocumentCommand{\GMtoC}{d() e{^}}{%
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket^{#2}_M}}
+\NewDocumentCommand{\GVtoC}{d() e{^}}{%
+	\mathopen{\llbracket}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrbracket^{#2}_V}}
+\NewDocumentCommand{\CtoGM}{d() e{^}}{%
+	\mathopen{\llparenthesis}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrparenthesis\IfValueT{#2}{^{#2}}_M}}
+\NewDocumentCommand{\CtoGC}{d() e{^}}{%
+	\mathopen{\llparenthesis}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rrparenthesis\IfValueT{#2}{^{#2}}_C}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% π-calculus
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Highlighting
+
+\def\piabbrev{\mathchoice%
+	{\text{π}}%
+	{\text{π}}%
+	{\scriptstyle π}%
+	{\scriptscriptstyle π}}
+\def\mathtypi[#1]#2{\mathtmpistyle[#1]{\mathtypicolor[#2]}}%
+\def\mathtmpi[#1]#2{\mathtmpistyle[#1]{\mathtmpicolor[#2]}}%
+
+\NewDocumentCommand{\pisetstyle}{m}{%
+\def\pistyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtypistyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmpistyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\pimark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtypistyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmpistyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\pimark[##1]##2{##1{##2_{\piabbrev}}}%
+}{%
+\def\mathtypistyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'π-calculus' is disabled}{}}%
+\def\mathtmpistyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'π-calculus' is disabled}{}}%
+\def\pimark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'π-calculus' is disabled}{}}%
+}}}
+\NewDocumentCommand{\pisetcolor}{m}{%
+	\def\picolor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtypicolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmpicolor[##1]{\mathtmprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtypicolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmpicolor[##1]{\mathtmsecondarycolor[##1]}%
+		}{%
+			\def\mathtypicolor[##1]{##1}%
+			\def\mathtmpicolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\piset}{m}{\pisetstyle{#1}\pisetcolor{#1}}
+\NewDocumentCommand{\piexp}{s m m}{%
+	\def\oldpistyle{\pistyle}%
+	\def\oldpicolor{\picolor}%
+	\IfBooleanTF{#1}{%
+		\pisetcolor{#2}}{%
+		\pisetstyle{#2}\pisetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\pisetcolor{\oldpicolor}}{%
+		\pisetstyle{\oldpistyle}\pisetcolor{\oldpicolor}}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\pity}[1]{\mathtypi[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\pitm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmpi[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmpi[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmpi[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmpi[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmpi[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmpi[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmpi[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmpi[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmpi[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmpi[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmpi[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmpi[\mathclose]{\rangle}}
+												{{\ifstrequal{#1}{\cdots}
+															{\mathtmpi[\mathinner]{\cdots}}
+															{\mathtmpi[\mathord]{#1}}
+														}}}}}}}}}}}}}}
+
+%%% Processes
+\NewDocumentCommand{\piAct}{t' e{^} e{_} t.}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{π}}{π}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}
+		\IfBooleanT{#4}{\mathpunct{.}}
+	}}
+\NewDocumentCommand{\pia}{t' e{^} e{_}}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\pib}{t' e{^} e{_}}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\pic}{t' e{^} e{_}}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\pix}{t' e{^} e{_}}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\piy}{t' e{^} e{_}}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\piz}{t' e{^} e{_}}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\piw}{t' e{^} e{_}}{%
+	\pitm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\piL[0]{\pitm{L#1#2#3}}
+\newcommandPIE\piM[0]{\pitm{M#1#2#3}}
+\newcommandPIE\piN[0]{\pitm{N#1#2#3}}
+\newcommandPIE\piP[0]{\pitm{P#1#2#3}}
+\newcommandPIE\piQ[0]{\pitm{Q#1#2#3}}
+\newcommandPIE\piR[0]{\pitm{R#1#2#3}}
+\newcommandPIE\piS[0]{\pitm{S#1#2#3}}
+\def\piChild{\mathop{\pitm{\labChild}}}
+
+%% Processes
+\NewDocumentCommand{\piNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\pitm(\piNew#1\pitm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\pitm{\lparen}#2\pitm{\rparen}}
+		}}{%
+		\pitm{\text{ν}}}}
+\def\piPar{\mathrel{\pitm\parallel}}
+\def\piSum{\mathrel{\pitm{+}}}
+\def\piAlt{\mathpunct{\pitm{+}}}
+\newcommand{\piLink}[3][]{\overset{#1}{#2{\pitm\leftrightarrow}#3}}
+\NewDocumentCommand{\piSend}{m m t. t; d()}{%
+	#1%
+	\pitm{\lbrack}#2\pitm{\rbrack}%
+	\IfBooleanT{#3}{\pitm{.}}%
+	\IfBooleanT{#4}{\pitm{;}}%
+	\IfValueT{#5}{\pitm{\lparen}#5\pitm{\rparen}}}
+\NewDocumentCommand{\piUSend}{m m t. t; d()}{%
+	#1%
+	\mathopen{\pitm{\langle}}#2\mathclose{\pitm{\rangle}}
+	\IfBooleanT{#3}{\pitm{.}}%
+	\IfBooleanT{#4}{\pitm{;}}%
+	\IfValueT{#5}{\pitm{\lparen}#5\pitm{\rparen}}}
+\NewDocumentCommand{\piRecv}{m m t. t;}{%
+	#1%
+	\pitm{\lparen}#2\pitm{\rparen}%
+	\IfBooleanT{#3}{\pitm{.}}%
+	\IfBooleanT{#4}{\pitm{;}}}
+\NewDocumentCommand{\piZ}{s}{%
+	\IfBooleanTF{#1}{%
+		\pitm{\mathrlap{0}{-}}%
+	}{%
+		\pitm{0}%
+	}}%
+\newcommand{\piSubst}[2]{\mathord{\pitm\{#1\pitm/#2\pitm\}}}
+
+% Relations
+\NewDocumentCommand{\piEval}{s t+}{%
+	\pimark[\mathrel]{\longrightarrow}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Linear π-calculus
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Highlighting
+
+\def\lpiabbrev{\mathchoice%
+	{\text{Lπ}}%
+	{\text{Lπ}}%
+	{\scriptstyle L\!π}%
+	{\scriptscriptstyle L\!π}}
+\def\mathtylpi[#1]#2{\mathtmlpistyle[#1]{\mathtylpicolor[#2]}}%
+\def\mathtmlpi[#1]#2{\mathtmlpistyle[#1]{\mathtmlpicolor[#2]}}%
+
+\NewDocumentCommand{\lpisetstyle}{m}{%
+\def\lpistyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtylpistyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmlpistyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\lpimark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtylpistyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmlpistyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\lpimark[##1]##2{##1{##2_{\lpiabbrev}}}%
+}{%
+\def\mathtylpistyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'lpi' is disabled}{}}%
+\def\mathtmlpistyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'lpi' is disabled}{}}%
+\def\lpimark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'lpi' is disabled}{}}%
+}}}
+\NewDocumentCommand{\lpisetcolor}{m}{%
+	\def\lpicolor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtylpicolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmlpicolor[##1]{\mathtmprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtylpicolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmlpicolor[##1]{\mathtmsecondarycolor[##1]}%
+		}{%
+			\def\mathtylpicolor[##1]{##1}%
+			\def\mathtmlpicolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\lpiset}{m}{\lpisetstyle{#1}\lpisetcolor{#1}}
+\NewDocumentCommand{\lpiexp}{s m m}{%
+	\def\oldlpistyle{\lpistyle}%
+	\def\oldlpicolor{\lpicolor}%
+	\IfBooleanTF{#1}{%
+		\lpisetcolor{#2}}{%
+		\lpisetstyle{#2}\lpisetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\lpisetcolor{\oldlpicolor}}{%
+		\lpisetstyle{\oldlpistyle}\lpisetcolor{\oldlpicolor}}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\lpity}[1]{\mathtylpi[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\lpitm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmlpi[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmlpi[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmlpi[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmlpi[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmlpi[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmlpi[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmlpi[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmlpi[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmlpi[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmlpi[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmlpi[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmlpi[\mathclose]{\rangle}}
+												{{\ifstrequal{#1}{\cdots}
+															{\mathtmlpi[\mathinner]{\cdots}}
+															{\mathtmlpi[\mathord]{#1}}
+														}}}}}}}}}}}}}}
+
+%%% Processes
+\NewDocumentCommand{\lpia}{t' e{^} e{_}}{%
+	\lpitm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lpib}{t' e{^} e{_}}{%
+	\lpitm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lpic}{t' e{^} e{_}}{%
+	\lpitm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lpix}{t' e{^} e{_}}{%
+	\lpitm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lpiy}{t' e{^} e{_}}{%
+	\lpitm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lpiz}{t' e{^} e{_}}{%
+	\lpitm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lpiw}{t' e{^} e{_}}{%
+	\lpitm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\lpiP[0]{\lpitm{P#1#2#3}}
+\newcommandPIE\lpiQ[0]{\lpitm{Q#1#2#3}}
+\newcommandPIE\lpiR[0]{\lpitm{R#1#2#3}}
+
+%% Processes
+\NewDocumentCommand{\lpiNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\lpitm(\lpiNew#1\lpitm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\lpitm{\lparen}#2\lpitm{\rparen}}
+		}}{%
+		\lpitm{\text{ν}}}}
+\def\lpiPar{\mathrel{\lpitm\parallel}}
+\def\lpiAlt{\mathpunct{\lpitm{+}}}
+\newcommand{\lpiLink}[3][]{\overset{#1}{#2{\lpitm\leftrightarrow}#3}}
+\NewDocumentCommand{\lpiSend}{m m t. d()}{%
+	#1\lpitm[#2\lpitm]\IfBooleanT{#3}{\lpitm.}\IfValueT{#4}{\lpitm(#4\lpitm)}}
+\NewDocumentCommand{\lpiUSend}{m m t. d()}{%
+	#1\mathopen{\lpitm{\langle}}#2\mathclose{\lpitm{\rangle}}\IfBooleanT{#3}{\lpitm.}\IfValueT{#4}{\lpitm(#4\lpitm)}}
+\NewDocumentCommand{\lpiRecv}{m m t.}{%
+	#1\lpitm(#2\lpitm)\IfBooleanT{#3}{\lpitm.}}
+\NewDocumentCommand{\lpiZ}{s}{%
+	\IfBooleanTF{#1}{%
+		\lpitm{\mathrlap{0}{-}}%
+	}{%
+		\lpitm{0}%
+	}}%
+\newcommand{\lpiSubst}[2]{\mathord{\lpitm\{#1\lpitm/#2\lpitm\}}}
+
+% Type Environments
+\newcommandPIE\lpiGG[0]{\lpity{Γ#1#2#3}}
+\newcommandPIE\lpiGD[0]{\lpity{Δ#1#2#3}}
+\def\lpiMerge{\mathrel{+}}
+
+% Relations
+\def\lpiSeq{\lpimark[\mathrel]{\vdash}}
+\NewDocumentCommand{\lpiEval}{s t+}{%
+	\lpimark[\mathrel]{\longrightarrow}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Wadler's Classical Processes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\NewDocumentCommand{\wcpNew}{d() d()}{%
+	\IfValueTF{#1}{
+		\cpNew#1\cptm.%
+		\IfValueT{#2}{
+			\IfSingleTF{#2}{#2}{\cptm{(}#2\cptm{)}}}
+	}{\cpNew}}
+\def\cpWadlerPar{\mathrel{\cptm{\vert}}}
+\NewDocumentCommand{\wcpSelect}{m m t.}{%
+	#2\cptm[\ifstrequal{#1}{1}{\cpInl}{\ifstrequal{#1}{2}{\cpInr}{#1}}\cptm]\IfBooleanT{#3}{\cptm.}}
+\NewDocumentCommand{\wcpOffer}{m >{\SplitList{;}} d()}{%
+	\def\cpAlt{\cptm,}%
+	#1\cptm.\cptm{\text{case}}%
+	\IfValueT{#2}{\cptm(\ProcessList{#2}{\cpAltListAdd}\cpAltListUse\cptm)}}
+\newcommand{\wcpAbsurd}[1]{\wcpOffer{#1}()}
+\NewDocumentCommand{\wcpEval}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{W}}{\longrightarrow_{W}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Classical Processes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\systemCP}{\mathbf{CP}}
+
+%% Highlighting
+
+\def\cpabbrev{\mathchoice%
+	{\text{C}}%
+	{\text{C}}%
+	{\scriptstyle C}%
+	{\scriptscriptstyle C}}
+\def\mathtycp[#1]#2{\mathtmcpstyle[#1]{\mathtycpcolor[#2]}}%
+\def\mathtmcp[#1]#2{\mathtmcpstyle[#1]{\mathtmcpcolor[#2]}}%
+
+\NewDocumentCommand{\cpsetstyle}{m}{%
+\def\cpstyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtycpstyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmcpstyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\cpmark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtycpstyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmcpstyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\cpmark[##1]##2{##1{##2_{\cpabbrev}}}%
+}{%
+\def\mathtycpstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'CP' is disabled}{}}%
+\def\mathtmcpstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'CP' is disabled}{}}%
+\def\cpmark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'CP' is disabled}{}}%
+}}}
+\NewDocumentCommand{\cpsetcolor}{m}{%
+	\def\cpcolor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtycpcolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmcpcolor[##1]{\mathtmprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtycpcolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmcpcolor[##1]{\mathtmsecondarycolor[##1]}%
+		}{%
+			\def\mathtycpcolor[##1]{##1}%
+			\def\mathtmcpcolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\cpset}{m}{\cpsetstyle{#1}\cpsetcolor{#1}}
+\NewDocumentCommand{\cpexp}{s m m}{%
+	\def\oldcpstyle{\cpstyle}%
+	\def\oldcpcolor{\cpcolor}%
+	\IfBooleanTF{#1}{%
+		\cpsetcolor{#2}}{%
+		\cpsetstyle{#2}\cpsetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\cpsetcolor{\oldcpcolor}}{%
+		\cpsetstyle{\oldcpstyle}\cpsetcolor{\oldcpcolor}}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\cpty}[1]{\mathtycp[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\cptm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmcp[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmcp[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmcp[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmcp[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmcp[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmcp[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmcp[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmcp[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmcp[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmcp[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmcp[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmcp[\mathclose]{\rangle}}
+												{{\ifstrequal{#1}{\cdots}
+															{\mathtmcp[\mathinner]{\cdots}}
+															{\mathtmcp[\mathord]{#1}}
+														}}}}}}}}}}}}}}
+
+%% Metavariables
+
+%%% Types
+\newcommandPIE\cpA[0]{\cpty{A#1#2#3}}
+\newcommandPIE\cpB[0]{\cpty{B#1#2#3}}
+\newcommandPIE\cpC[0]{\cpty{C#1#2#3}}
+\newcommandPIE\cpD[0]{\cpty{D#1#2#3}}
+
+%%% Processes
+\NewDocumentCommand{\cpa}{t' e{^} e{_}}{%
+	\cptm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\cpb}{t' e{^} e{_}}{%
+	\cptm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\cpc}{t' e{^} e{_}}{%
+	\cptm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\cpx}{t' e{^} e{_}}{%
+	\cptm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\cpy}{t' e{^} e{_}}{%
+	\cptm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\cpz}{t' e{^} e{_}}{%
+	\cptm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\cpw}{t' e{^} e{_}}{%
+	\cptm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\cpP[0]{\cptm{P#1#2#3}}
+\newcommandPIE\cpQ[0]{\cptm{Q#1#2#3}}
+\newcommandPIE\cpR[0]{\cptm{R#1#2#3}}
+\newcommandPIE\cpT[0]{\cptm{T#1#2#3}}
+\newcommandPIE\cpNN[0]{\cptm{N#1#2#3}}
+\newcommandPIE\cpNM[0]{\cptm{M#1#2#3}}
+
+%%% Process Contexts
+\NewDocumentCommand{\cpPlug}{d[]}{\mathord{\cptm[#1\cptm]}}
+\NewDocumentCommand{\cpCP}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\cptm{P%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\cptm\lbrack}%
+		\def\cpAlt{\cptm,}%
+		\ProcessList{#4}{\cpAltListAdd}\cpAltListUse%
+		\mathclose{\cptm\rbrack}
+	}{%
+		\mathopen{\cptm\lbrack}%
+		\cptm\cdot%
+		\mathclose{\cptm\rbrack}%
+	}}%
+\NewDocumentCommand{\cpCQ}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\cptm{Q%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\cptm\lbrack}%
+		\def\cpAlt{\cptm,}%
+		\ProcessList{#4}{\cpAltListAdd}\cpAltListUse%
+		\mathclose{\cptm\rbrack}
+	}{%
+		\mathopen{\cptm\lbrack}%
+		\cptm\cdot%
+		\mathclose{\cptm\rbrack}%
+	}}%
+\NewDocumentCommand{\cpCR}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\cptm{R%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\cptm\lbrack}%
+		\def\cpAlt{\cptm,}%
+		\ProcessList{#4}{\cpAltListAdd}\cpAltListUse%
+		\mathclose{\cptm\rbrack}
+	}{%
+		\mathopen{\cptm\lbrack}%
+		\cptm\cdot%
+		\mathclose{\cptm\rbrack}%
+	}}%
+\NewDocumentCommand{\cpCC}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\cptm{\mathcal{C}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{%
+		\mathopen{\cptm\lbrack}%
+		\def\cpAlt{\cptm,}%
+		\ProcessList{#4}{\cpAltListAdd}\cpAltListUse%
+		\mathclose{\cptm\rbrack}}}
+\NewDocumentCommand{\cpCD}{t' e{^} e{_} d[]}{%
+	\cptm{\mathcal{D}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\cptm\lbrack}#4\mathclose{\cptm\rbrack}}}
+\NewDocumentCommand{\cpEE}{t' e{^} e{_} d[]}{%
+	\cptm{\mathcal{E}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\cptm\lbrack}#4\mathclose{\cptm\rbrack}}}
+\NewDocumentCommand{\cpEF}{t' e{^} e{_} d[]}{%
+	\cptm{\mathcal{F}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\cptm\lbrack}#4\mathclose{\cptm\rbrack}}}
+
+%%% Environments
+\newcommandPIE\cpGG[0]{\cpty{Γ#1#2#3}}
+\newcommandPIE\cpGD[0]{\cpty{Δ#1#2#3}}
+
+%% Types
+\def\cpOne{\cpty{\llOne}}
+\def\cpNil{\cpty{\llNil}}
+\def\cpTop{\cpty{\llTop}}
+\def\cpBot{\cpty{\llBot}}
+\newcommand{\cpPerp}[1]{#1^{\cpty{\perp}}}
+\def\cpTens{\mathbin{\cpty{\llTens}}}
+\def\cpParr{\mathbin{\cpty{\llParr}}}
+\def\cpPlus{\mathbin{\cpty{\llPlus}}}
+\def\cpWith{\mathbin{\cpty{\llWith}}}
+
+%% Environments
+\def\cpSBot{\cdot}
+% \def\cpSParr{,}
+
+%% Processes
+\NewDocumentCommand{\cpNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\cptm(\cpNew#1\cptm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\cptm{\lparen}#2\cptm{\rparen}}
+		}}{%
+		\cptm{\text{ν}}}}
+\def\cpPar{\mathrel{\cptm\parallel}}
+\def\cpAlt{\mathpunct{\cptm{;}}}
+\newcommand{\cpLink}[3][]{\overset{#1}{#2{\cptm\leftrightarrow}#3}}
+\NewDocumentCommand{\cpSend}{m m t. d()}{%
+	#1\cptm[#2\cptm]\IfBooleanT{#3}{\cptm.}\IfValueT{#4}{\cptm(#4\cptm)}}
+\NewDocumentCommand{\cpUSend}{m m t. d()}{%
+	#1\mathopen{\cptm{\langle}}#2\mathclose{\cptm{\rangle}}\IfBooleanT{#3}{\cptm.}\IfValueT{#4}{\cptm(#4\cptm)}}
+\NewDocumentCommand{\cpRecv}{m m t.}{%
+	#1\cptm(#2\cptm)\IfBooleanT{#3}{\cptm.}}
+\NewDocumentCommand{\cpClose}{m t. t0}{%
+	\cpSend{#1}{}\IfBooleanT{#2}{\cptm. \IfBooleanT{#3}{\cpZ}}}
+\NewDocumentCommand{\cpWait}{m t.}{%
+	\cpRecv{#1}{}\IfBooleanT{#2}{\cptm.}}
+\NewDocumentCommand{\cpInl}{t:}{%
+	\cptm{\text{inl}}\IfBooleanT{#1}{\cptm:\:}}
+\NewDocumentCommand{\cpInr}{t:}{%
+	\cptm{\text{inr}}\IfBooleanT{#1}{\cptm:\:}}
+\NewDocumentCommand{\cpSelect}{m e{<} t.}{%
+	#1\,\scaleobj{0.75}{\cptm{\triangleleft}}\:%
+	\ifstrequal{#2}{1}{\cpInl}{\ifstrequal{#2}{2}{\cpInr}{#2}}%
+	\IfBooleanT{#3}{\cptm.}}
+\NewDocumentCommand{\cpOffer}{m e{>} >{\SplitList{;}} d()}{%
+	#1\:\scaleobj{0.75}{\cptm{\triangleright}}\,%
+	\IfValueTF{#2}{%
+		\ifstrequal{#2}{1}{\cpInl}{\ifstrequal{#2}{2}{\cpInr}{#2}}%
+	}{%
+		\IfValueT{#3}{\cptm\{\ProcessList{#3}{\cpAltListAdd}\cpAltListUse\cptm\}}}}
+\NewDocumentCommand{\cpZ}{s}{%
+	\IfBooleanTF{#1}{%
+		\cptm{\mathrlap{0}{-}}%
+	}{%
+		\cptm{0}%
+	}}%
+\newcommand{\cpAbsurd}[1]{\cpOffer{#1}()}
+\newcommand{\cpSubst}[2]{\mathord{\cptm\{#1\cptm/#2\cptm\}}}
+
+% `\cpZap`: Zap symbol
+\newcommand{\cpZap}{\mathop{\cptm{\lightning}}}
+
+% `\cpZop`: Zop symbol
+\newcommand{\cpZop}{\mathop{\mathchoice%
+		{\rotatebox[origin=c]{180}{$\cpZap$}}%
+		{\rotatebox[origin=c]{180}{$\cpZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptstyle\cpZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptscriptstyle\cpZap$}}}}
+
+%%% Actions
+\newcommand{\cpKill}[1]{\mathord{\cpZop}#1}
+\newcommand{\cpDie}[1]{\mathord{\cpZap}#1}
+\newcommand{\cpKilled}[1]{#1\mathord{\cpZap}}
+\newcommand{\cpDied}[1]{#1\mathord{\cpZop}}
+
+% `\cpAbsurdZap`: Alternative to `\cpAbsurd`
+\NewDocumentCommand{\cpAbsurdZap}{m >{\SplitList{;}} d()}{%
+	\def\cpAlt{\cptm,}%
+	#1\cpZap%
+	\IfValueTF{#2}{\cptm\{\ProcessList{#2}{\cpAltListAdd}\cpAltListUse\cptm\}}{\!}
+}%
+
+% `\cpAbsurdZop`
+\NewDocumentCommand{\cpAbsurdZop}{m m}{#1\cpZop#2}%
+
+% `\cpAltListAdd`: Add alternative process
+\ExplSyntaxOn
+\tl_new:N \l_cp_alt_list_temp_tl%
+\newcommand{\cpAltListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_cp_alt_list_temp_tl {
+			\tl_put_right:Nn \l_cp_alt_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_cp_alt_list_temp_tl { \cpAlt~#1 }
+		}
+	}
+}
+\ExplSyntaxOff
+
+% `\cpAltListUse`: Use alternative processes
+\ExplSyntaxOn
+\newcommand{\cpAltListUse}{
+	\tl_use:N \l_cp_alt_list_temp_tl
+	\tl_set:Nn \l_cp_alt_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+%% Contexts
+\newcommandPIE\cpHole[0]{\cptm{\Box#1#2#3}}
+
+%% Functions & Relations
+\def\cpSeq{\cpmark[\mathrel]{\vdash}}
+\def\cpSeqTo{\to}
+\NewDocumentCommand{\cpEval}{s t+ t/}{%
+	\IfBooleanTF{#3}{%
+		\cpmark[\mathrel]{\not\longrightarrow}
+	}{%
+		\cpmark[\mathrel]{\longrightarrow}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\cpEvalA}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{\alpha}}{\longrightarrow_{\alpha}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\cpEvalB}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{\beta}}{\longrightarrow_{\beta}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\cpEvalC}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{C}}{\longrightarrow_{C}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\cpEvalCC}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{CC}}{\longrightarrow_{CC}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\def\cpEquiv{\cpmark[\mathrel]{\equiv}}
+\def\cpNEquiv{\cpmark[\mathrel]{\not\equivL}}
+\def\cpEquivS{\cpmark[\mathrel]{\equivS}}
+\def\cpNEquivS{\cpmark[\mathrel]{\nequivS}}
+\def\cpEquivLP{\cpmark[\mathrel]{\equivLP}}
+\def\cpNEquivLP{\cpmark[\mathrel]{\nequivLP}}
+\def\cpEquivD{\cpmark[\mathrel]{\equivD}}
+\def\cpNEquivD{\cpmark[\mathrel]{\nequivD}}
+\def\cpEquivLPS{\cpmark[\mathrel]{\equivLPS}}
+\def\cpNEquivLPS{\cpmark[\mathrel]{\nequivLPS}}
+\def\cpBarbedEquiv{\approxeq}
+\newcommand{\cpOb}[1]{\mathord{\downarrow_{#1}}}
+
+%% Typing Rules
+
+%%% T-Link
+\NewDocumentCommand{\cpLINK}{s m m m o}{
+	\AXC{}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Link}}}{%
+		\RightLabel{\RuleLabel{C}{T-Link}}}
+	\UIC{$\cpLink{#2}{#3} \cpSeq #2 : #4, #3 : \IfValueTF{#5}{#5}{\co{#4}}$}}
+
+%%% T-Cut
+\NewDocumentCommand{\cpCUT}{s m m m m m m m o}{
+	\AXC{$#4 \cpSeq #6, #2 : #8$}
+	\AXC{$#5 \cpSeq #7, #3 : \IfValueTF{#9}{#9}{\co{#8}}$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Cut}}}{%
+		\RightLabel{\RuleLabel{C}{T-Cut}}}
+	\BIC{$\cpNew(#2#3)(#4\cpPar#5) \cpSeq #6, #7$}}
+
+%%% T-Send
+\NewDocumentCommand{\cpSEND}{s m m m m m m m m}{
+	\AXC{$#4 \cpSeq #6, #3 : #8$}
+	\AXC{$#5 \cpSeq #7, #2 : #9$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Send}}}{%
+		\RightLabel{\RuleLabel{C}{T-Send}}}
+	\BIC{$\cpSend{#2}{#3}.(#4\cpPar#5) \cpSeq #6, #7, #2 : #8\cpTens#9$}}
+
+%%% T-USend
+\NewDocumentCommand{\cpUSEND}{s m m m m m m}{
+	\AXC{$#4 \cpSeq #5, #3 : #6, #2 : #7$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-USend}}}{%
+		\RightLabel{\RuleLabel{C}{T-USend}}}
+	\UIC{$\cpUSend{#2}{#3}.#4 \cpSeq #5, #2 : #6\cpTens#7, #3 : \co{#6}$}}
+
+%%% T-Recv
+\NewDocumentCommand{\cpRECV}{s m m m m m m}{
+	\AXC{$#4 \cpSeq #5, #3 : #6, #2 : #7$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Recv}}}{%
+		\RightLabel{\RuleLabel{C}{T-Recv}}}
+	\UIC{$\cpRecv{#2}{#3}.#4 \cpSeq #5, #2 : #6\cpParr#7$}}
+
+%%% T-Close
+\NewDocumentCommand{\cpCLOSE}{s m}{
+	\AXC{}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Close}}}{%
+		\RightLabel{\RuleLabel{C}{T-Close}}}
+	\UIC{$\cpClose{#2}.\cpZ \cpSeq #2 : \cpOne$}}
+
+%%% T-Wait
+\NewDocumentCommand{\cpWAIT}{s m m m}{
+	\AXC{$#3 \cpSeq #4$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Wait}}}{%
+		\RightLabel{\RuleLabel{C}{T-Wait}}}
+	\UIC{$\cpWait{#2}.#3 \cpSeq #4, #2 : \cpBot$}}
+
+%%% T-Select1
+\NewDocumentCommand{\cpSELECTINL}{s m m m m m}{
+	\AXC{$#3 \cpSeq #4, #2 : #5$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Select1}}}{%
+		\RightLabel{\RuleLabel{C}[T-Select\textsubscript{1}]{T-Select1}}}
+	\UIC{$\cpSelect{#2}<1.#3 \cpSeq #4, #2 : #5\cpPlus#6$}}
+
+%%% T-Select2
+\NewDocumentCommand{\cpSELECTINR}{s m m m m m}{
+	\AXC{$#3 \cpSeq #4, #2 : #6$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Select2}}}{%
+		\RightLabel{\RuleLabel{C}[T-Select\textsubscript{2}]{T-Select2}}}
+	\UIC{$\cpSelect{#2}<1.#3 \cpSeq #4, #2 : #5\cpPlus#6$}}
+
+%%% T-Offer
+\NewDocumentCommand{\cpOFFER}{s m m m m m m}{
+	\AXC{$#3 \cpSeq #5, #2 : #6$}
+	\AXC{$#4 \cpSeq #5, #2 : #7$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Offer}}}{%
+		\RightLabel{\RuleLabel{C}{T-Offer}}}
+	\BIC{$\cpOffer{#2}(\cpInl: #3; \cpInr: #4) \cpSeq #5, #2 : #6\cpWith#7$}}
+
+%%% T-Absurd
+\NewDocumentCommand{\cpABSURD}{s m m}{
+	\AXC{}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-Absur}}}{%
+		\RightLabel{\RuleLabel{C}{T-Absurd}}}
+	\UIC{$\cpAbsurd{#2} \cpSeq #3, #2 : \cpTop$}}
+
+%%% T-Absurd
+\NewDocumentCommand{\cpABSURDZAP}{s m m m}{
+	\AXC{$#3 = \msToSet{\fn(#4)}$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{C-T-AbsurdZap}}}{%
+		\RightLabel{\RuleLabel{C}[T-Absurd]{T-AbsurdZap}}}
+	\UIC{$\cpAbsurdZap{#2}{#3} \cpSeq #4, #2 : \cpTop$}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Multiset Classical Processes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\mpabbrev{\mathchoice%
+	{\mathcal{C}}%
+	{\mathcal{C}}%
+	{\scriptstyle\mathcal{C}}%
+	{\scriptscriptstyle\mathcal{C}}}
+\def\mathtymp[#1]#2{\mathtmmpstyle[#1]{\mathtympcolor[#2]}}%
+\def\mathtmmp[#1]#2{\mathtmmpstyle[#1]{\mathtmmpcolor[#2]}}%
+
+\NewDocumentCommand{\mpsetstyle}{m}{%
+\def\mpstyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtympstyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmmpstyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\mpmark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtympstyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmmpstyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\mpmark[##1]##2{##1{##2_{\mpabbrev}}}%
+}{%
+\def\mathtympstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Multiset CP' is disabled}{}}%
+\def\mathtmmpstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Multiset CP' is disabled}{}}%
+\def\mpmark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Multiset CP' is disabled}{}}%
+}}}
+\NewDocumentCommand{\mpsetcolor}{m}{%
+	\def\mpcolor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtympcolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmmpcolor[##1]{\mathtmprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtympcolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmmpcolor[##1]{\mathtmsecondarycolor[##1]}%
+		}{%
+			\def\mathtympcolor[##1]{##1}%
+			\def\mathtmmpcolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\mpset}{m}{\mpsetstyle{#1}\mpsetcolor{#1}}
+\NewDocumentCommand{\mpexp}{s m m}{%
+	\def\oldmpstyle{\mpstyle}%
+	\def\oldmpcolor{\mpcolor}%
+	\IfBooleanTF{#1}{%
+		\mpsetcolor{#2}}{%
+		\mpsetstyle{#2}\mpsetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\mpsetcolor{\oldmpcolor}}{%
+		\mpsetstyle{\oldmpstyle}\mpsetcolor{\oldmpcolor}}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\mpty}[1]{\mathtymp[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\mptm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmmp[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmmp[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmmp[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmmp[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmmp[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmmp[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmmp[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmmp[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmmp[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmmp[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmmp[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmmp[\mathclose]{\rangle}}
+												{\ifstrequal{#1}{\cdots}
+													{\mathtmmp[\mathinner]{\cdots}}
+													{\mathtmmp[\mathord]{#1}}
+												}}}}}}}}}}}}}
+
+%% Metavariables
+\newcommandPIE\mpP[0]{\mptm{\mathcal{P}#1#2#3}}
+\newcommandPIE\mpQ[0]{\mptm{\mathcal{Q}#1#2#3}}
+\newcommandPIE\mpR[0]{\mptm{\mathcal{R}#1#2#3}}
+% \NewDocumentCommand{\mpa}{t' e{^} e{_}}{%
+%   \mptm{%
+%     \IfBooleanTF{#1}{\bar{a}}{a}%
+%     \IfValueT{#2}{^{#2}}%
+%     \IfValueT{#3}{_{#3}}%
+%   }}
+% \NewDocumentCommand{\mpb}{t' e{^} e{_}}{%
+%   \mptm{%
+%     \IfBooleanTF{#1}{\bar{b}}{b}%
+%     \IfValueT{#2}{^{#2}}%
+%     \IfValueT{#3}{_{#3}}%
+%   }}
+% \NewDocumentCommand{\mpc}{t' e{^} e{_}}{%
+%   \mptm{%
+%     \IfBooleanTF{#1}{\bar{c}}{c}%
+%     \IfValueT{#2}{^{#2}}%
+%     \IfValueT{#3}{_{#3}}%
+%   }}
+% \NewDocumentCommand{\mpx}{t' e{^} e{_}}{%
+%   \mptm{%
+%     \IfBooleanTF{#1}{\bar{x}}{x}%
+%     \IfValueT{#2}{^{#2}}%
+%     \IfValueT{#3}{_{#3}}%
+%   }}
+% \NewDocumentCommand{\mpy}{t' e{^} e{_}}{%
+%   \mptm{%
+%     \IfBooleanTF{#1}{\bar{y}}{y}%
+%     \IfValueT{#2}{^{#2}}%
+%     \IfValueT{#3}{_{#3}}%
+%   }}
+% \NewDocumentCommand{\mpz}{t' e{^} e{_}}{%
+%   \mptm{%
+%     \IfBooleanTF{#1}{\bar{z}}{z}%
+%     \IfValueT{#2}{^{#2}}%
+%     \IfValueT{#3}{_{#3}}%
+%   }}
+% \NewDocumentCommand{\mpw}{t' e{^} e{_}}{%
+%   \mptm{%
+%     \IfBooleanTF{#1}{\bar{w}}{w}%
+%     \IfValueT{#2}{^{#2}}%
+%     \IfValueT{#3}{_{#3}}%
+%   }}
+% \newcommandPIE\mpA[0]{\mpty{A#1#2#3}}
+% \newcommandPIE\mpB[0]{\mpty{B#1#2#3}}
+% \newcommandPIE\mpC[0]{\mpty{C#1#2#3}}
+% \newcommandPIE\mpD[0]{\mpty{D#1#2#3}}
+% \newcommandPIE\mpGG[0]{\mpty{Γ#1#2#3}}
+% \newcommandPIE\mpGD[0]{\mpty{Δ#1#2#3}}
+
+%%% Hyper-Environments
+\newcommandPIE\mpHG[0]{\mpty{\mathcal{G}#1#2#3}}
+\newcommandPIE\mpHH[0]{\mpty{\mathcal{H}#1#2#3}}
+\def\mpHTens{\mathrel{\parallel}}
+\def\mpHOne{\mathord{\circ}}
+
+%%% Processes
+\def\mpPar{\mathrel{\mptm\parallel}}
+\NewDocumentCommand{\mpZ}{s}{%
+	\IfBooleanTF{#1}{%
+		\mptm{\mathrlap{0}{-}}%
+	}{%
+		\mptm{0}%
+	}}%
+
+%% Relations
+\def\mpSeq{\mpmark[\mathrel]{\vdash}}
+\NewDocumentCommand{\mpEval}{s t+ t/}{%
+	\mathrel{%
+		\IfBooleanTF{#3}{%
+			\mpmark[\mathrel]{\not\longrightarrow}
+		}{%
+			\mpmark[\mathrel]{\longrightarrow}}%
+		\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}}
+\def\mpEquiv{\mpmark[\mathrel]{\equiv}}
+\def\mpNEquiv{\mpmark[\mathrel]{\not\equiv}}
+\def\mpEquivL{\mpmark[\mathrel]{\equivL}}
+\def\mpNEquivL{\mpmark[\mathrel]{\nequivL}}
+\def\mpEquivS{\mpmark[\mathrel]{\equivS}}
+\def\mpNEquivS{\mpmark[\mathrel]{\nequivS}}
+\def\mpEquivLS{\mpmark[\mathrel]{\equivLS}}
+\def\mpNEquivLS{\mpmark[\mathrel]{\nequivLS}}
+\def\mpEquivLP{\mpmark[\mathrel]{\equivLP}}
+\def\mpNEquivLP{\mpmark[\mathrel]{\nequivLP}}
+\def\mpEquivD{\mpmark[\mathrel]{\equivD}}
+\def\mpNEquivD{\mpmark[\mathrel]{\nequivD}}
+\def\mpEquivLPS{\mpmark[\mathrel]{\equivLPS}}
+\def\mpNEquivLPS{\mpmark[\mathrel]{\nequivLPS}}
+\def\mpEquivLSP{\mpmark[\mathrel]{\equivLSP}}
+\def\mpNEquivLSP{\mpmark[\mathrel]{\nequivLSP}}
+\def\mpEquivLPSP{\mpmark[\mathrel]{\equivLPSP}}
+\def\mpNEquivLPSP{\mpmark[\mathrel]{\nequivLPSP}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hypersequent Classical Processes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\systemHCP}{\mathbf{HCP}}
+
+%% Highlighting
+
+\def\hpabbrev{\mathchoice%
+	{\text{H}}%
+	{\text{H}}%
+	{\scriptstyle H}%
+	{\scriptscriptstyle H}}
+\def\mathtyhp[#1]#2{\mathtmhpstyle[#1]{\mathtyhpcolor[#2]}}%
+\def\mathtmhp[#1]#2{\mathtmhpstyle[#1]{\mathtmhpcolor[#2]}}%
+
+\NewDocumentCommand{\hpsetstyle}{m}{%
+\def\hpstyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtyhpstyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmhpstyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\hpmark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtyhpstyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmhpstyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\hpmark[##1]##2{##1{##2_{\hpabbrev}}}%
+}{%
+\def\mathtyhpstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Hypersequent CP' is disabled}{}}%
+\def\mathtmhpstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Hypersequent CP' is disabled}{}}%
+\def\hpmark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Hypersequent CP' is disabled}{}}%
+}}}
+\NewDocumentCommand{\hpsetcolor}{m}{%
+	\def\hpcolor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtyhpcolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmhpcolor[##1]{\mathtmprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtyhpcolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmhpcolor[##1]{\mathtmsecondarycolor[##1]}%
+		}{%
+			\def\mathtyhpcolor[##1]{##1}%
+			\def\mathtmhpcolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\hpset}{m}{\hpsetstyle{#1}\hpsetcolor{#1}}
+\NewDocumentCommand{\hpexp}{s m m}{%
+	\def\oldhpstyle{\hpstyle}%
+	\def\oldhpcolor{\hpcolor}%
+	\IfBooleanTF{#1}{%
+		\hpsetcolor{#2}}{%
+		\hpsetstyle{#2}\hpsetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\hpsetcolor{\oldhpcolor}}{%
+		\hpsetstyle{\oldhpstyle}\hpsetcolor{\oldhpcolor}}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\hpty}[1]{\mathtyhp[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\hptm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmhp[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmhp[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmhp[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmhp[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmhp[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmhp[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmhp[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmhp[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmhp[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmhp[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmhp[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmhp[\mathclose]{\rangle}}
+												{\ifstrequal{#1}{\cdots}
+													{\mathtmhp[\mathinner]{\cdots}}
+													{\mathtmhp[\mathord]{#1}}
+												}}}}}}}}}}}}}
+
+%% Metavariables
+
+%% Labels
+\NewDocumentCommand{\hpl}{s t' e{^} e{_} t{:} t{\in} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{l%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hpty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hpty{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\hpty{,}}}%
+	}{%
+		\hptm{l%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hptm{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\hptm{,}}}%
+	}}
+\NewDocumentCommand{\hpk}{s t' e{^} e{_} t{:} t{\in} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{k%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hpty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hpty{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\hpty{,}}}%
+	}{%
+		\hptm{k%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hptm{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\hptm{,}}}%
+	}}
+\NewDocumentCommand{\hpL}{s t' e{^} e{_} t{\cup} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{L%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\hpty{\cup}}}%
+		\IfBooleanT{#6}{\mathpunct{\hpty{,}}}%
+	}{%
+		\hptm{L%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\hptm{\cup}}}%
+		\IfBooleanT{#6}{\mathpunct{\hptm{,}}}%
+	}}
+\NewDocumentCommand{\hpLL}{s t' e{^} e{_}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{\mathcal{L}%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+	}{%
+		\hptm{\mathcal{L}%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+	}}
+\NewDocumentCommand{\hpi}{s t' e{^} e{_} t{:} t{\in}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{i%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hpty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hpty{\in}}}%
+	}{%
+		\hptm{i%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hptm{\in}}}%
+	}}
+\NewDocumentCommand{\hpj}{s t' e{^} e{_} t{:} t{\in}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{j%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hpty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hpty{\in}}}%
+	}{%
+		\hptm{j%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\hptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\hptm{\in}}}%
+	}}
+\NewDocumentCommand{\hpI}{s t' e{^} e{_} t{\cup}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{I%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\hpty{\cup}}}%
+	}{%
+		\hptm{I%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\hptm{\cup}}}%
+	}}
+\NewDocumentCommand{\hpJ}{s t' e{^} e{_} t{\cup}}{%
+	\IfBooleanTF{#1}{%
+		\hpty{J%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\hpty{\cup}}}%
+	}{%
+		\hptm{J%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\hptm{\cup}}}%
+	}}
+
+%%% Types
+\newcommandPIE\hpA[0]{\hpty{A#1#2#3}}
+\newcommandPIE\hpB[0]{\hpty{B#1#2#3}}
+\newcommandPIE\hpC[0]{\hpty{C#1#2#3}}
+\newcommandPIE\hpD[0]{\hpty{D#1#2#3}}
+
+%%% Processes
+\NewDocumentCommand{\hpa}{t' e{^} e{_}}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\hpb}{t' e{^} e{_}}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\hpc}{t' e{^} e{_}}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\hpx}{t' e{^} e{_}}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\hpy}{t' e{^} e{_}}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\hpz}{t' e{^} e{_}}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\hpw}{t' e{^} e{_}}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\hpP[0]{\hptm{P#1#2#3}}
+\newcommandPIE\hpQ[0]{\hptm{Q#1#2#3}}
+\newcommandPIE\hpR[0]{\hptm{R#1#2#3}}
+\newcommandPIE\hpS[0]{\hptm{S#1#2#3}}
+\newcommandPIE\hpT[0]{\hptm{T#1#2#3}}
+\newcommandPIE\hpNM[0]{\hptm{M#1#2#3}}
+\newcommandPIE\hpNN[0]{\hptm{N#1#2#3}}
+\newcommandPIE\hpNK[0]{\hptm{K#1#2#3}}
+\newcommandPIE\hpNW[0]{\hptm{W#1#2#3}}
+
+%%% Process Contexts
+\NewDocumentCommand{\hpPlug}{d[]}{\mathord{\hptm[#1\hptm]}}
+\NewDocumentCommand{\hpCP}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\hptm{P%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\hptm\lbrack}%
+		\def\hpAlt{\hptm,}%
+		\ProcessList{#4}{\hpAltListAdd}\hpAltListUse%
+		\mathclose{\hptm\rbrack}
+	}{%
+		\mathopen{\hptm\lbrack}%
+		\hptm\cdot%
+		\mathclose{\hptm\rbrack}%
+	}}%
+\NewDocumentCommand{\hpCQ}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\hptm{Q%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\hptm\lbrack}%
+		\def\hpAlt{\hptm,}%
+		\ProcessList{#4}{\hpAltListAdd}\hpAltListUse%
+		\mathclose{\hptm\rbrack}
+	}{%
+		\mathopen{\hptm\lbrack}%
+		\hptm\cdot%
+		\mathclose{\hptm\rbrack}%
+	}}%
+\NewDocumentCommand{\hpCR}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\hptm{R%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\hptm\lbrack}%
+		\def\hpAlt{\hptm,}%
+		\ProcessList{#4}{\hpAltListAdd}\hpAltListUse%
+		\mathclose{\hptm\rbrack}
+	}{%
+		\mathopen{\hptm\lbrack}%
+		\hptm\cdot%
+		\mathclose{\hptm\rbrack}%
+	}}%
+\NewDocumentCommand{\hpCC}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\hptm{\mathcal{C}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\hptm\lbrack}%
+		\def\hpArgSep{\hptm,}%
+		\ProcessList{#4}{\hpArgListAdd}\hpArgListUse%
+		\mathclose{\hptm\rbrack}
+	}{%
+		\mathopen{\hptm\lbrack}%
+		\hptm\cdot%
+		\mathclose{\hptm\rbrack}%
+	}}%
+\NewDocumentCommand{\hpCD}{t' e{^} e{_} >{\SplitList{,}} d[]}{%
+	\hptm{\mathcal{D}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\hptm\lbrack}%
+		\def\hpArgSep{\hptm,}%
+		\ProcessList{#4}{\hpArgListAdd}\hpArgListUse%
+		\mathclose{\hptm\rbrack}
+	}{%
+		\mathopen{\hptm\lbrack}%
+		\hptm\cdot%
+		\mathclose{\hptm\rbrack}%
+	}}%
+\NewDocumentCommand{\hpEE}{t' e{^} e{_} d[]}{%
+	\hptm{\mathcal{E}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\hptm\lbrack}#4\mathclose{\hptm\rbrack}}}
+\NewDocumentCommand{\hpEF}{t' e{^} e{_} d[]}{%
+	\hptm{\mathcal{F}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\hptm\lbrack}#4\mathclose{\hptm\rbrack}}}
+
+%%% Environments
+\newcommandPIE\hpGG[0]{\hpty{Γ#1#2#3}}
+\newcommandPIE\hpGD[0]{\hpty{Δ#1#2#3}}
+
+%%% Hyper-Environments
+\newcommandPIE\hpHG[0]{\hpty{\mathcal{G}#1#2#3}}
+\newcommandPIE\hpHH[0]{\hpty{\mathcal{H}#1#2#3}}
+
+%%% Label
+\def\hpLabPar{\mathrel{\hptm{\parallel}}}
+\newcommandPIE\hpLab[0]{\hptm{\ell#1#2#3}}
+\NewDocumentCommand{\hpAct}{t' e{^} e{_} t.}{%
+	\hptm{%
+		\IfBooleanTF{#1}{\bar{π}}{π}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}
+		\IfBooleanT{#4}{\mathpunct{.}}
+	}}
+\newcommandPIE\hpTau[0]{\hptm{τ#1#2#3}}
+
+%% Types
+\def\hpOne{\hpty{\llOne}}
+\def\hpNil{\hpty{\llNil}}
+\def\hpTop{\hpty{\llTop}}
+\def\hpBot{\hpty{\llBot}}
+\def\hpImpl{\mathbin{\hpty{\llImpl}}}
+\def\hpTens{\mathbin{\hpty{\llTens}}}
+\def\hpParr{\mathbin{\hpty{\llParr}}}
+\def\hpPlus{\mathbin{\hpty{\llPlus}}}
+\def\hpWith{\mathbin{\hpty{\llWith}}}
+\newcommand{\hpPerp}[1]{#1^{\hpty{\perp}}}
+
+\def\hpBigPlusOp{%
+	\mathop{\mathchoice%
+		{\hpty{\bigoplus}}%
+		{\hpty{\bigoplus}}%
+		{\hpty{\bigoplus}}%
+		{\hpty{\bigoplus}}%
+	}}
+\NewDocumentCommand{\hpBigPlus}{t' e{^} e{_} >{\SplitList{;}} m}{%
+	\hpty{\hpBigPlusOp%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\mathopen{\hpty{\lbrace}}
+	\def\hpAlt{\hpty{;}}%
+	\ProcessList{#4}{\hpAltListAdd}\hpAltListUse%
+	\mathclose{\hpty{\rbrace}}}
+\def\hpBigWithOp{%
+	\mathop{\mathchoice%
+		{\hpty{\bigwith}}%
+		{\hpty{\bigwith}}%
+		{\hpty{\bigwith}}%
+		{\hpty{\bigwith}}%
+	}}
+\NewDocumentCommand{\hpBigWith}{t' e{^} e{_} >{\SplitList{;}} m}{%
+	\hpty{\hpBigWithOp%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\mathopen{\hpty{\lbrace}}
+	\def\hpAlt{\hpty{;}}%
+	\ProcessList{#4}{\hpAltListAdd}\hpAltListUse%
+	\mathclose{\hpty{\rbrace}}}
+
+%% Environments
+\def\hpSBot{\llSBot}
+\def\hpSParr{\llSParr}
+
+%% Hyper-Environments
+\def\hpHTens{\llHTens}
+\def\hpHOne{\llHOne}
+
+%% Processes
+\NewDocumentCommand{\hpNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\hptm(\hpNew#1\hptm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\hptm{\lparen}#2\hptm{\rparen}}
+		}}{%
+		\hptm{\text{ν}}}}
+\def\hpPar{\mathrel{\hptm\parallel}}
+\NewDocumentCommand{\hpParSplit}{m m}{\mathrel{{}_{#1}{\hpPar}_{#2}}}
+\DeclareMathOperator*{\hpBigPar}{\hptm{\bigparallel}}
+\def\hpAlt{\mathpunct{\hptm{;}}}
+\newcommand{\hpLink}[3][]{\overset{#1}{#2{\hptm\leftrightarrow}#3}}
+\NewDocumentCommand{\hpSend}{m m t. d()}{%
+	#1\hptm[#2\hptm]\IfBooleanT{#3}{\hptm.}\IfValueT{#4}{\hptm(#4\hptm)}}
+\NewDocumentCommand{\hpUSend}{m m t. d()}{%
+	#1\mathopen{\hptm{\langle}}#2\mathclose{\hptm{\rangle}}\IfBooleanT{#3}{\hptm.}\IfValueT{#4}{\hptm(#4\hptm)}}
+\NewDocumentCommand{\hpRecv}{m m t.}{%
+	#1\hptm(#2\hptm)\IfBooleanT{#3}{\hptm.}}
+\NewDocumentCommand{\hpClose}{m t. t0}{%
+	\hpSend{#1}{}\IfBooleanT{#2}{\hptm. \IfBooleanT{#3}{\hpZ}}}
+\NewDocumentCommand{\hpWait}{m t.}{%
+	\hpRecv{#1}{}\IfBooleanT{#2}{\hptm.}}
+\NewDocumentCommand{\hpInl}{t:}{%
+	\hptm{\text{inl}}\IfBooleanT{#1}{\hptm:\:}}
+\NewDocumentCommand{\hpInr}{t:}{%
+	\hptm{\text{inr}}\IfBooleanT{#1}{\hptm:\:}}
+\NewDocumentCommand{\hpSelect}{m e{<} t.}{%
+	#1\,\scaleobj{0.75}{\hptm{\triangleleft}}\:%
+	\ifstrequal{#2}{1}{\hpInl}{\ifstrequal{#2}{2}{\hpInr}{#2}}%
+	\IfBooleanT{#3}{\hptm.}}
+\NewDocumentCommand{\hpOffer}{m e{>} t{.} >{\SplitList{;}} d()}{%
+	#1\:\scaleobj{0.75}{\hptm{\triangleright}}\,%
+	\IfValueTF{#2}{%
+		\ifstrequal{#2}{1}{\hpInl}{\ifstrequal{#2}{2}{\hpInr}{#2}}%
+		\IfBooleanT{#3}{\hptm{.}}%
+	}{%
+		\IfValueT{#4}{\hptm\{\ProcessList{#4}{\hpAltListAdd}\hpAltListUse\hptm\}}}}
+\newcommand{\hpAbsurd}[1]{\hpOffer{#1}()}
+\newcommand{\hpSubst}[2]{\mathord{\hptm\{#1\hptm/#2\hptm\}}}
+\newcommand{\hpSum}[0]{\mathbin{\hptm{+}}}
+
+% `\hpZap`: Zap symbol
+\newcommand{\hpZap}{\mathop{\hptm{\lightning}}}
+
+% `\hpZop`: Zop symbol
+\newcommand{\hpZop}{\mathop{\mathchoice%
+		{\rotatebox[origin=c]{180}{$\hpZap$}}%
+		{\rotatebox[origin=c]{180}{$\hpZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptstyle\hpZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptscriptstyle\hpZap$}}}}
+
+%%% `\hpZ`: Terminated process (* for marking)
+\NewDocumentCommand{\hpZ}{s}{%
+	\IfBooleanTF{#1}{%
+		\hptm{\mathrlap{0}{-}}%
+	}{%
+		\hptm{0}%
+	}}%
+
+%%% Actions
+\newcommand{\hpKill}[1]{\mathord{\hpZop}#1}
+\newcommand{\hpDie}[1]{#1\mathord{\hpZop}}
+\newcommand{\hpKilled}[1]{\mathord{\hpZap}#1}
+\newcommand{\hpDied}[1]{#1\mathord{\hpZap}}
+
+\NewDocumentCommand{\hpZapper}{>{\SplitList{,}} m}{%
+	\mathord{\hpZap}%
+	\def\hpItemSep{\hptm,}%
+	\ProcessList{#1}{\hpItemListAdd}\hpItemListUse%
+}
+
+% `\hpZapperNKW`: Alternative to `\hpAbsurd`
+\NewDocumentCommand{\hpZapperNKW}{
+	>{\SplitList{,}} m
+	>{\SplitList{,}} o
+	>{\SplitList{,}} o}{
+	\def\hpItemSep{\hptm,}%
+	\ProcessList{#1}{\hpItemListAdd}\hpItemListUse%
+	\mathbin{\hpZap}%
+	\IfValueTF{#2}{\ProcessList{#2}{\hpItemListAdd}\hpItemListUse}{\hptm\emptyset}%
+	\hptm;%
+	\IfValueTF{#3}{\ProcessList{#3}{\hpItemListAdd}\hpItemListUse}{\hptm\emptyset}%
+}
+
+% `\hpAbsurdZap`: Alternative to `\hpAbsurd`
+\NewDocumentCommand{\hpAbsurdZap}{m >{\SplitList{,}} m}{
+	#1\hpZap%
+	\def\hpItemSep{\hptm,}%
+	\ProcessList{#2}{\hpItemListAdd}\hpItemListUse
+}%
+
+% `\hpAbsurdZop`: Dual to `\hpAbsurdZap`
+\NewDocumentCommand{\hpAbsurdZop}{m >{\SplitList{,}} m}{
+	#1\hpZop%
+	\def\hpItemSep{\hptm,}%
+	\ProcessList{#2}{\hpItemListAdd}\hpItemListUse
+}%
+
+\ExplSyntaxOn
+% `\hpAltListAdd`: Add alternative process
+\tl_new:N \l_hp_alt_list_temp_tl%
+\newcommand{\hpAltListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_hp_alt_list_temp_tl {
+			\tl_put_right:Nn \l_hp_alt_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_hp_alt_list_temp_tl { \hpAlt~#1 }
+		}
+	}
+}
+% `\hpAltListUse`: Use alternative processes
+\newcommand{\hpAltListUse}{
+	\tl_use:N \l_hp_alt_list_temp_tl
+	\tl_set:Nn \l_hp_alt_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+\ExplSyntaxOn
+% `\hpItemListAdd`: Add alternative process
+\tl_new:N \l_hp_item_list_temp_tl%
+\newcommand{\hpItemListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_hp_item_list_temp_tl {
+			\tl_put_right:Nn \l_hp_item_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_hp_item_list_temp_tl { \hpItemSep~#1 }
+		}
+	}
+}
+% `\hpItemListUse`: Use alternative processes
+\newcommand{\hpItemListUse}{
+	\tl_use:N \l_hp_item_list_temp_tl
+	\tl_set:Nn \l_hp_item_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+\ExplSyntaxOn
+% `\hpArgListAdd`: Add argument
+\tl_new:N \l_hp_arg_list_temp_tl%
+\newcommand{\hpArgListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_hp_arg_list_temp_tl {
+			\tl_put_right:Nn \l_hp_arg_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_hp_arg_list_temp_tl { \hpArgSep~#1 }
+		}
+	}
+}
+% `\hpArgListUse`: Use argument list
+\newcommand{\hpArgListUse}{
+	\tl_use:N \l_hp_arg_list_temp_tl
+	\tl_set:Nn \l_hp_arg_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+% `\hpInterleave`: N-ary interleave relation
+\def\hpInterleaveOp{\mathrel{\sim}}
+\NewDocumentCommand{\hpInterleave}{>{\SplitList{~}} m m}{%
+	\ProcessList{#1}{\hpInterleaveListAdd}\hpInterleaveListUse = #2}%
+
+\ExplSyntaxOn
+\tl_new:N \l_hp_interleave_list_temp_tl%
+% `\hpInterleaveListAdd`: Add evaluation context
+\newcommand{\hpInterleaveListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_hp_interleave_list_temp_tl {
+			\tl_put_right:Nn \l_hp_interleave_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_hp_interleave_list_temp_tl { \hpInterleaveOp~#1 }
+		}
+	}
+}
+% `\hpInterleaveListUse`: Use evaluation contexts
+\newcommand{\hpInterleaveListUse}{
+	\tl_use:N \l_hp_interleave_list_temp_tl
+	\tl_set:Nn \l_hp_interleave_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+%% Contexts
+\newcommandPIE\hpHole[0]{\hptm{\Box#1#2#3}}
+\NewDocumentCommand{\hpCtxInv}{m}{{#1}^{-1}}
+
+%% Relations
+\def\hpSeq{\hpmark[\mathrel]{\vdash}}
+\def\hpFocA{\mathrel{\Uparrow}}
+\def\hpSeqTo{\to}
+\NewDocumentCommand{\hpTo}{m}{\xrightarrow{\ensuremath{#1}}}
+\def\hpTTo{\xrightarrow{\ensuremath{\hpTau}}}
+\NewDocumentCommand{\hpBigDis}{d() e{^} e{_}}{%
+	\mathopen{\lwiggle}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rwiggle}%
+	\IfValueT{#2}{^{#2}}%
+	\IfValueT{#3}{_{#3}}}
+\NewDocumentCommand{\hpDis}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\rightsquigarrow}{\rightsquigarrow}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\hpEval}{s t+ t/}{%
+	\IfBooleanTF{#3}{\hpmark[\mathrel]{\not\longrightarrow}}{\hpmark[\mathrel]{\longrightarrow}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\hpEvalS}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{S}}{\longrightarrow_{S}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\hpEvalA}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{\alpha}}{\longrightarrow_{\alpha}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\hpEvalB}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\longrightarrow_{\beta}}{\longrightarrow_{\beta}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\def\hpEquiv{\hpmark[\mathrel]{\equiv}}
+\def\hpNEquiv{\hpmark[\mathrel]{\not\equiv}}
+\def\hpEquivS{\hpmark[\mathrel]{\equivS}}
+\def\hpNEquivS{\hpmark[\mathrel]{\nequivS}}
+\def\hpEquivLP{\hpmark[\mathrel]{\equivLP}}
+\def\hpNEquivLP{\hpmark[\mathrel]{\nequivLP}}
+\def\hpEquivD{\hpmark[\mathrel]{\equivD}}
+\def\hpNEquivD{\hpmark[\mathrel]{\nequivD}}
+\def\hpEquivLPS{\hpmark[\mathrel]{\equivLPS}}
+\def\hpNEquivLPS{\hpmark[\mathrel]{\nequivLPS}}
+\def\hpBarbedEquiv{\approxeq}
+\newcommand{\hpOb}[1]{\mathord{\downarrow_{#1}}}
+
+%% Typing Rules
+
+%%% T-Link
+\NewDocumentCommand{\hpLINK}{s m m m o}{
+	\AXC{}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Link}}}{%
+		\RightLabel{\RuleLabel{H}{T-Link}}}
+	\UIC{$\hpLink{#2}{#3} \hpSeq #2 : #4, #3 : \IfValueTF{#5}{#5}{\co{#4}}$}}
+
+%%% T-New
+\NewDocumentCommand{\hpNEW}{s m m m m m m m o}{
+	\AXC{$#4 \hpSeq #5 \hpHTens #6, #2 : #8 \hpHTens #7, #3 : \IfValueTF{#9}{#9}{\co{#8}}$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-New}}}{%
+		\RightLabel{\RuleLabel{H}{T-New}}}
+	\UIC{$\hpNew(#2#3)#4 \hpSeq #5 \hpHTens #6, #7$}}
+
+%%% T-Par
+\NewDocumentCommand{\hpPAR}{s m m m m}{
+	\AXC{$#2 \hpSeq #4$}
+	\AXC{$#3 \hpSeq #5$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Par}}}{%
+		\RightLabel{\RuleLabel{H}{T-Par}}}
+	\BIC{$#2\hpPar#3 \hpSeq #4 \hpHTens #5$}}
+
+%%% T-Halt
+\NewDocumentCommand{\hpHALT}{s}{
+	\AXC{}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Halt}}}{%
+		\RightLabel{\RuleLabel{H}{T-Halt}}}
+	\UIC{$\hpZ \hpSeq \hpHOne$}}
+
+%%% T-Send
+\NewDocumentCommand{\hpSEND}{s m m m m m m m}{
+	\AXC{$#4 \hpSeq #5, #2 : #7 \hpHTens #6, #3 : #8$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Send}}}{%
+		\RightLabel{\RuleLabel{H}{T-Send}}}
+	\UIC{$\hpSend{#2}{#3}.#4 \hpSeq #5, #6, #2 : #7\hpTens#8$}}
+
+%%% T-Recv
+\NewDocumentCommand{\hpRECV}{s m m m m m m}{
+	\AXC{$#4 \hpSeq #5, #3 : #6, #2 : #7$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Recv}}}{%
+		\RightLabel{\RuleLabel{H}{T-Recv}}}
+	\UIC{$\hpRecv{#2}{#3}.#4 \hpSeq #5, #2 : #6\hpParr#7$}}
+
+%%% T-Close
+\NewDocumentCommand{\hpCLOSE}{s m}{
+	\AXC{$\hpP \hpSeq \hpHOne$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Close}}}{%
+		\RightLabel{\RuleLabel{H}{T-Close}}}
+	\UIC{$\hpClose{#2}.\hpP \hpSeq #2 : \hpOne$}}
+
+%%% T-Wait
+\NewDocumentCommand{\hpWAIT}{s m m m}{
+	\AXC{$#3 \hpSeq #4$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Wait}}}{%
+		\RightLabel{\RuleLabel{H}{T-Wait}}}
+	\UIC{$\hpWait{#2}.#3 \hpSeq #4, #2 : \hpBot$}}
+
+%%% T-Select1
+\NewDocumentCommand{\hpSELECTINL}{s m m m m m}{
+	\AXC{$#3 \hpSeq #4, #2 : #5$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Select1}}}{%
+		\RightLabel{\RuleLabel{H}[T-Select\textsubscript{1}]{T-Select1}}}
+	\UIC{$\hpSelect{#2}<1.#3 \hpSeq #4, #2 : #5\hpPlus#6$}}
+
+%%% T-Select2
+\NewDocumentCommand{\hpSELECTINR}{s m m m m m}{
+	\AXC{$#3 \hpSeq #4, #2 : #6$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Select2}}}{%
+		\RightLabel{\RuleLabel{H}[T-Select\textsubscript{2}]{T-Select2}}}
+	\UIC{$\hpSelect{#2}<1.#3 \hpSeq #4, #2 : #5\hpPlus#6$}}
+
+%%% T-Offer
+\NewDocumentCommand{\hpOFFER}{s m m m m m m}{
+	\AXC{$#3 \hpSeq #5, #2 : #6$}
+	\AXC{$#4 \hpSeq #5, #2 : #7$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Offer}}}{%
+		\RightLabel{\RuleLabel{H}{T-Offer}}}
+	\BIC{$\hpOffer{#2}(\hpInl: #3; \hpInr: #4) \hpSeq #5, #2 : #6\hpWith#7$}}
+
+%%% T-Absurd
+\NewDocumentCommand{\hpABSURD}{s m m}{
+	\AXC{}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Absurd}}}{%
+		\RightLabel{\RuleLabel{H}{T-Absurd}}}
+	\UIC{$\hpAbsurd{#2} \hpSeq #3, #2 : \hpTop$}}
+
+%%% T-AbsurdZap
+\NewDocumentCommand{\hpABSURDZAP}{s m m m}{
+	\AXC{$#3 = \msToSet{\fn(#4)}$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-AbsurdZap}}}{%
+		\RightLabel{\RuleLabel{H}[T-Absurd]{T-AbsurdZap}}}
+	\UIC{$\hpAbsurdZap{#2}{#3} \hpSeq #4, #2 : \hpTop$}}
+
+%%% T-Foc-Send
+\NewDocumentCommand{\hpFOCSEND}{s m m m m m m m}{
+	\AXC{$#4 \hpSeq #5, #2 : #7 \hpHTens #6, #3 : #8$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Foc-Send}}}{%
+		\RightLabel{\RuleLabel{H}[T-Send]{T-Foc-Send}}}
+	\UIC{$\hpSend{#2}{#3}.#4 \hpSeq #5, #6, #2 \hpFocA #7\hpTens#8$}}
+
+%%% T-Foc-Recv
+\NewDocumentCommand{\hpFOCRECV}{s m m m m m m}{
+	\AXC{$#4 \hpSeq #5, #3 : #6, #2 : #7$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Foc-Recv}}}{%
+		\RightLabel{\RuleLabel{H}[T-Recv]{T-Foc-Recv}}}
+	\UIC{$\hpRecv{#2}{#3}.#4 \hpSeq #5, #2 \hpFocA #6\hpParr#7$}}
+
+%%% T-Foc-Close
+\NewDocumentCommand{\hpFOCCLOSE}{s m}{
+	\AXC{$\hpP \hpSeq \hpHOne$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Foc-Close}}}{%
+		\RightLabel{\RuleLabel{H}[T-Close]{T-Foc-Close}}}
+	\UIC{$\hpClose{#2}.\hpP \hpSeq #2 \hpFocA \hpOne$}}
+
+%%% T-Foc-Wait
+\NewDocumentCommand{\hpFOCWAIT}{s m m m}{
+	\AXC{$#3 \hpSeq #4$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{H-T-Foc-Wait}}}{%
+		\RightLabel{\RuleLabel{H}[T-Wait]{T-Foc-Wait}}}
+	\UIC{$\hpWait{#2}.#3 \hpSeq #4, #2 \hpFocA \hpBot$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Priority Classical Processes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\systemPCP}{\mathbf{PCP}}
+
+%% Highlighting
+
+\def\ppabbrev{P}%
+\def\mathtypp[#1]#2{\mathtmppstyle[#1]{\mathtyppcolor[#2]}}%
+\def\mathtmpp[#1]#2{\mathtmppstyle[#1]{\mathtmppcolor[#2]}}%
+\def\mathprpp[#1]#2{\mathprppstyle[#1]{\mathprppcolor[#2]}}%
+
+\NewDocumentCommand{\ppsetstyle}{m}{%
+\def\ppstyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtyppstyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmppstyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\mathprppstyle[##1]##2{\mathprprimarystyle[##1]{##2}}%
+\def\ppmark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtyppstyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmppstyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\mathprppstyle[##1]##2{\mathprsecondarystyle[##1]{##2}}%
+\def\ppmark[##1]##2{##1{##2_{\ppabbrev}}}%
+}{%
+\def\mathtyppstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+\def\mathtmppstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+\def\mathprppstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+\def\ppmark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+}}}
+\NewDocumentCommand{\ppsetcolor}{m}{%
+	\def\ppcolor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtyppcolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmppcolor[##1]{\mathtmprimarycolor[##1]}%
+		\def\mathprppcolor[##1]{\mathprprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtyppcolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmppcolor[##1]{\mathtmsecondarycolor[##1]}%
+			\def\mathprppcolor[##1]{\mathprsecondarycolor[##1]}%
+		}{%
+			\def\mathtyppcolor[##1]{##1}%
+			\def\mathtmppcolor[##1]{##1}%
+			\def\mathprppcolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\ppset}{m}{\ppsetstyle{#1}\ppsetcolor{#1}}
+\NewDocumentCommand{\ppexp}{s m m}{%
+	\def\oldppstyle{\ppstyle}%
+	\def\oldppcolor{\ppcolor}%
+	\IfBooleanTF{#1}{%
+		\ppsetcolor{#2}}{%
+		\ppsetstyle{#2}\ppsetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\ppsetcolor{\oldppcolor}}{%
+		\ppsetstyle{\oldppstyle}\ppsetcolor{\oldppcolor}}}
+
+%%% Priorities: YellowOrange, sans-serif
+\newcommand{\pppr}[1]{\mathprpp[\mathord]{#1}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\ppty}[1]{\mathtypp[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\pptm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmpp[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmpp[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmpp[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmpp[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmpp[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmpp[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmpp[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmpp[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmpp[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmpp[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmpp[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmpp[\mathclose]{\rangle}}
+												{\ifstrequal{#1}{\cdots}
+													{\mathtmpp[\mathinner]{\cdots}}
+													{\mathtmpp[\mathord]{#1}}
+												}}}}}}}}}}}}}
+
+%% Metavariables
+
+%% Labels
+\NewDocumentCommand{\ppl}{s t' e{^} e{_} t{:} t{\in} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{l%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ppty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ppty{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\ppty{,}}}%
+	}{%
+		\pptm{l%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pptm{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\pptm{,}}}%
+	}}
+\NewDocumentCommand{\ppk}{s t' e{^} e{_} t{:} t{\in} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{k%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ppty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ppty{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\ppty{,}}}%
+	}{%
+		\pptm{k%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pptm{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\pptm{,}}}%
+	}}
+\NewDocumentCommand{\ppL}{s t' e{^} e{_} t{\cup} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{L%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\ppty{\cup}}}%
+		\IfBooleanT{#6}{\mathpunct{\ppty{,}}}%
+	}{%
+		\pptm{L%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\pptm{\cup}}}%
+		\IfBooleanT{#6}{\mathpunct{\pptm{,}}}%
+	}}
+\NewDocumentCommand{\ppLL}{s t' e{^} e{_}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{\mathcal{L}%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+	}{%
+		\pptm{\mathcal{L}%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+	}}
+\NewDocumentCommand{\ppi}{s t' e{^} e{_} t{:} t{\in}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{i%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ppty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ppty{\in}}}%
+	}{%
+		\pptm{i%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pptm{\in}}}%
+	}}
+\NewDocumentCommand{\ppj}{s t' e{^} e{_} t{:} t{\in}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{j%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ppty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ppty{\in}}}%
+	}{%
+		\pptm{j%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pptm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pptm{\in}}}%
+	}}
+\NewDocumentCommand{\ppI}{s t' e{^} e{_} t{\cup}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{I%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\ppty{\cup}}}%
+	}{%
+		\pptm{I%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\pptm{\cup}}}%
+	}}
+\NewDocumentCommand{\ppJ}{s t' e{^} e{_} t{\cup}}{%
+	\IfBooleanTF{#1}{%
+		\ppty{J%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\ppty{\cup}}}%
+	}{%
+		\pptm{J%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\pptm{\cup}}}%
+	}}
+
+%%% Priorities
+\newcommandPIE\ppo[0]{\pppr{o#1#2#3}}
+\newcommandPIE\ppp[0]{\pppr{p#1#2#3}}
+\newcommandPIE\ppq[0]{\pppr{q#1#2#3}}
+
+%%% Types
+\newcommandPIE\ppA[0]{\ppty{A#1#2#3}}
+\newcommandPIE\ppB[0]{\ppty{B#1#2#3}}
+\newcommandPIE\ppC[0]{\ppty{C#1#2#3}}
+\newcommandPIE\ppD[0]{\ppty{D#1#2#3}}
+
+%%% Environments
+\newcommandPIE\ppGG[0]{\ppty{Γ#1#2#3}}
+\newcommandPIE\ppGD[0]{\ppty{Δ#1#2#3}}
+
+%%% Processes
+\NewDocumentCommand{\ppa}{t' e{^} e{_}}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ppb}{t' e{^} e{_}}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ppc}{t' e{^} e{_}}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ppx}{t' e{^} e{_}}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ppy}{t' e{^} e{_}}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ppz}{t' e{^} e{_}}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ppw}{t' e{^} e{_}}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\ppP[0]{\pptm{P#1#2#3}}
+\newcommandPIE\ppQ[0]{\pptm{Q#1#2#3}}
+\newcommandPIE\ppR[0]{\pptm{R#1#2#3}}
+\newcommandPIE\ppS[0]{\pptm{S#1#2#3}}
+\newcommandPIE\ppNM[0]{\pptm{M#1#2#3}}
+\newcommandPIE\ppNN[0]{\pptm{N#1#2#3}}
+\newcommandPIE\ppNK[0]{\pptm{K#1#2#3}}
+\newcommandPIE\ppNW[0]{\pptm{W#1#2#3}}
+
+%%% Process Contexts
+\NewDocumentCommand{\ppPlug}{d[]}{\mathord{\pptm[#1\pptm]}}
+\NewDocumentCommand{\ppCC}{t' e{^} e{_} d[]}{%
+	\pptm{\mathcal{C}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pptm\lbrack}#4\mathclose{\pptm\rbrack}}}
+\NewDocumentCommand{\ppCD}{t' e{^} e{_} d[]}{%
+	\pptm{\mathcal{D}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pptm\lbrack}#4\mathclose{\pptm\rbrack}}}
+\NewDocumentCommand{\ppEE}{t' e{^} e{_} d[]}{%
+	\pptm{\mathcal{E}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pptm\lbrack}#4\mathclose{\pptm\rbrack}}}
+\NewDocumentCommand{\ppEF}{t' e{^} e{_} d[]}{%
+	\pptm{\mathcal{F}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pptm\lbrack}#4\mathclose{\pptm\rbrack}}}
+
+%%% Label
+\def\ppLabPar{\mathrel{\pptm{\parallel}}}
+\newcommandPIE\ppLab[0]{\pptm{\ell#1#2#3}}
+\NewDocumentCommand{\ppAct}{t' e{^} e{_} t.}{%
+	\pptm{%
+		\IfBooleanTF{#1}{\bar{π}}{π}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}
+		\IfBooleanT{#4}{\mathpunct{.}}
+	}}
+\newcommandPIE\ppTau[0]{\pptm{τ#1#2#3}}
+
+%% Types
+\newcommandPIE\ppOne[0]{\ppty{\llOne#1#2#3}}
+\newcommandPIE\ppNil[0]{\ppty{\llNil#1#2#3}}
+\newcommandPIE\ppTop[0]{\ppty{\llTop#1#2#3}}
+\newcommandPIE\ppBot[0]{\ppty{\llBot#1#2#3}}
+\newcommandPIE\ppImpl[0]{\mathbin{\ppty{\llImpl#1#2#3}}}
+\newcommandPIE\ppBiImpl[0]{\mathbin{\ppty{\llBiImpl#1#2#3}}}
+\newcommandPIE\ppTens[0]{\mathbin{\ppty{\llTens#1#2#3}}}
+\newcommandPIE\ppParr[0]{\mathbin{\ppty{\llParr#1#2#3}}}
+\newcommandPIE\ppPlus[0]{\mathbin{\ppty{\llPlus#1#2#3}}}
+\newcommandPIE\ppWith[0]{\mathbin{\ppty{\llWith#1#2#3}}}
+
+\def\ppBigPlusOp{%
+	\mathop{\mathchoice%
+		{\ppty{\bigoplus}}%
+		{\ppty{\bigoplus}}%
+		{\ppty{\bigoplus}}%
+		{\ppty{\bigoplus}}%
+	}}
+\NewDocumentCommand{\ppBigPlus}{t' e{^} e{_} >{\SplitList{;}} m}{%
+	\ppty{\ppBigPlusOp%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\mathopen{\ppty{\lbrace}}
+	\def\ppAlt{\ppty{;}}%
+	\ProcessList{#4}{\ppAltListAdd}\ppAltListUse%
+	\mathclose{\ppty{\rbrace}}}
+\def\ppBigWithOp{%
+	\mathop{\mathchoice%
+		{\ppty{\bigwith}}%
+		{\ppty{\bigwith}}%
+		{\ppty{\bigwith}}%
+		{\ppty{\bigwith}}%
+	}}
+\NewDocumentCommand{\ppBigWith}{t' e{^} e{_} >{\SplitList{;}} m}{%
+	\ppty{\ppBigWithOp%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\mathopen{\ppty{\lbrace}}
+	\def\ppAlt{\ppty{;}}%
+	\ProcessList{#4}{\ppAltListAdd}\ppAltListUse%
+	\mathclose{\ppty{\rbrace}}}
+
+%% Environments
+\def\ppSBot{\llSBot}
+\def\ppSParr{\llSParr}
+
+%% Processes
+\NewDocumentCommand{\ppNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\pptm(\ppNew#1\pptm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\pptm{\lparen}#2\pptm{\rparen}}
+		}}{%
+		\pptm{\text{ν}}}}
+\def\ppPar{\mathrel{\pptm\parallel}}
+\NewDocumentCommand{\ppParSplit}{m m}{\mathrel{{}_{#1}{\ppPar}_{#2}}}
+\DeclareMathOperator*{\ppBigPar}{\pptm{\bigparallel}}
+\def\ppAlt{\mathpunct{\pptm{;}}}
+\newcommand{\ppLink}[3][]{\overset{#1}{#2{\pptm\leftrightarrow}#3}}
+\NewDocumentCommand{\ppSend}{m m t. d()}{%
+	#1\pptm[#2\pptm]\IfBooleanT{#3}{\pptm.}\IfValueT{#4}{\pptm(#4\pptm)}}
+\NewDocumentCommand{\ppUSend}{m m t. d()}{%
+	#1\mathopen{\pptm{\langle}}#2\mathclose{\pptm{\rangle}}\IfBooleanT{#3}{\pptm.}\IfValueT{#4}{\pptm(#4\pptm)}}
+\NewDocumentCommand{\ppRecv}{m m t.}{%
+	#1\pptm(#2\pptm)\IfBooleanT{#3}{\pptm.}}
+\NewDocumentCommand{\ppClose}{m t. t0}{%
+	\ppSend{#1}{}\IfBooleanT{#2}{\pptm. \IfBooleanT{#3}{\ppZ}}}
+\NewDocumentCommand{\ppWait}{m t.}{%
+	\ppRecv{#1}{}\IfBooleanT{#2}{\pptm.}}
+\NewDocumentCommand{\ppInl}{t:}{%
+	\pptm{\text{inl}}\IfBooleanT{#1}{\pptm:\:}}
+\NewDocumentCommand{\ppInr}{t:}{%
+	\pptm{\text{inr}}\IfBooleanT{#1}{\pptm:\:}}
+\NewDocumentCommand{\ppSelect}{m e{<} t.}{%
+	#1\,\scaleobj{0.75}{\pptm{\triangleleft}}\:%
+	\ifstrequal{#2}{1}{\ppInl}{\ifstrequal{#2}{2}{\ppInr}{#2}}%
+	\IfBooleanT{#3}{\pptm.}}
+\NewDocumentCommand{\ppOffer}{m e{>} t{.} >{\SplitList{;}} d()}{%
+	#1\:\scaleobj{0.75}{\pptm{\triangleright}}\,%
+	\IfValueTF{#2}{%
+		\ifstrequal{#2}{1}{\ppInl}{\ifstrequal{#2}{2}{\ppInr}{#2}}%
+		\IfBooleanT{#3}{\pptm{.}}%
+	}{%
+		\IfValueT{#4}{\pptm\{\ProcessList{#4}{\ppAltListAdd}\ppAltListUse\pptm\}}}}
+\newcommand{\ppAbsurd}[1]{\ppOffer{#1}()}
+\newcommand{\ppSubst}[2]{\mathord{\pptm\{#1\pptm/#2\pptm\}}}
+\newcommand{\ppSum}[0]{\mathbin{\pptm{+}}}
+
+% `\ppZap`: Zap symbol
+\newcommand{\ppZap}{\mathop{\pptm{\lightning}}}
+
+% `\ppZop`: Zop symbol
+\newcommand{\ppZop}{\mathop{\mathchoice%
+		{\rotatebox[origin=c]{180}{$\ppZap$}}%
+		{\rotatebox[origin=c]{180}{$\ppZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptstyle\ppZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptscriptstyle\ppZap$}}}}
+
+%%% `\ppZ`: Terminated process (* for marking)
+\NewDocumentCommand{\ppZ}{s}{%
+	\IfBooleanTF{#1}{%
+		\pptm{\mathrlap{0}{-}}%
+	}{%
+		\pptm{0}%
+	}}%
+
+%%% Actions
+\newcommand{\ppKill}[1]{\mathord{\ppZop}#1}
+\newcommand{\ppDie}[1]{#1\mathord{\ppZop}}
+\newcommand{\ppKilled}[1]{\mathord{\ppZap}#1}
+\newcommand{\ppDied}[1]{#1\mathord{\ppZap}}
+
+\NewDocumentCommand{\ppZapper}{>{\SplitList{,}} m}{%
+	\mathord{\ppZap}%
+	\def\ppAlt{\pptm,}%
+	\ProcessList{#1}{\ppAltListAdd}\ppAltListUse%
+}
+
+% `\ppZapperNKW`: Alternative to `\ppAbsurd`
+\NewDocumentCommand{\ppZapperNKW}{
+	>{\SplitList{,}} m
+	>{\SplitList{,}} o
+	>{\SplitList{,}} o}{
+	\def\ppAlt{\pptm,}%
+	\ProcessList{#1}{\ppAltListAdd}\ppAltListUse%
+	\mathbin{\ppZap}%
+	\IfValueTF{#2}{\ProcessList{#2}{\ppAltListAdd}\ppAltListUse}{\pptm\emptyset}%
+	\pptm;%
+	\IfValueTF{#3}{\ProcessList{#3}{\ppAltListAdd}\ppAltListUse}{\pptm\emptyset}%
+}
+
+
+% `\ppAbsurdZap`: Alternative to `\ppAbsurd`
+\NewDocumentCommand{\ppAbsurdZap}{m >{\SplitList{,}} m}{
+	#1\ppZap%
+	\def\ppAlt{\pptm,}%
+	\ProcessList{#2}{\ppAltListAdd}\ppAltListUse
+}%
+
+% `\ppAbsurdZop`: Dual to `\ppAbsurdZap`
+\NewDocumentCommand{\ppAbsurdZop}{m >{\SplitList{,}} m}{
+	#1\ppZop%
+	\def\ppAlt{\pptm,}%
+	\ProcessList{#2}{\ppAltListAdd}\ppAltListUse
+}%
+
+\ExplSyntaxOn
+% `\ppAltListAdd`: Add alternative process
+\tl_new:N \l_pp_alt_list_temp_tl%
+\newcommand{\ppAltListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_pp_alt_list_temp_tl {
+			\tl_put_right:Nn \l_pp_alt_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_pp_alt_list_temp_tl { \ppAlt~#1 }
+		}
+	}
+}
+% `\ppAltListUse`: Use alternative processes
+\newcommand{\ppAltListUse}{
+	\tl_use:N \l_pp_alt_list_temp_tl
+	\tl_set:Nn \l_pp_alt_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+% `\ppInterleave`: N-ary interleave relation
+\def\ppInterleaveOp{\mathrel{\sim}}
+\NewDocumentCommand{\ppInterleave}{>{\SplitList{~}} m m}{%
+	\ProcessList{#1}{\ppInterleaveListAdd}\ppInterleaveListUse = #2}%
+
+\ExplSyntaxOn
+\tl_new:N \l_pp_interleave_list_temp_tl%
+% `\ppInterleaveListAdd`: Add evaluation context
+\newcommand{\ppInterleaveListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_pp_interleave_list_temp_tl {
+			\tl_put_right:Nn \l_pp_interleave_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_pp_interleave_list_temp_tl { \ppInterleaveOp~#1 }
+		}
+	}
+}
+% `\ppInterleaveListUse`: Use evaluation contexts
+\newcommand{\ppInterleaveListUse}{
+	\tl_use:N \l_pp_interleave_list_temp_tl
+	\tl_set:Nn \l_pp_interleave_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+%% Contexts
+\newcommandPIE\ppHole[0]{\pptm{\Box#1#2#3}}
+\NewDocumentCommand{\ppCtxInv}{m}{{#1}^{-1}}
+
+%% Relations
+\NewDocumentCommand{\ppSeq}{t/}{%
+	\IfBooleanTF{#1}{\ppmark[\mathrel]{\nvdash}}{\ppmark[\mathrel]{\vdash}}}
+\def\ppFocA{\mathrel{\Uparrow}}
+\def\ppSeqTo{\to}
+\NewDocumentCommand{\ppTo}{m}{\xrightarrow{\ensuremath{#1}}}
+\def\ppTTo{\xrightarrow{\ensuremath{\ppTau}}}
+\NewDocumentCommand{\ppBigDis}{d() e{^} e{_}}{%
+	\mathopen{\lwiggle}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rwiggle}%
+	\IfValueT{#2}{^{#2}}%
+	\IfValueT{#3}{_{#3}}}
+\NewDocumentCommand{\ppDis}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\rightsquigarrow}{\rightsquigarrow}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ppEval}{s t+ t/}{%
+	\IfBooleanTF{#3}{\ppmark[\mathrel]{\not\Longrightarrow}}{\ppmark[\mathrel]{\Longrightarrow}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ppEvalS}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\Longrightarrow_{S}}{\Longrightarrow_{S}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ppEvalA}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\Longrightarrow_{\alpha}}{\Longrightarrow_{\alpha}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ppEvalB}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\Longrightarrow_{\beta}}{\Longrightarrow_{\beta}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ppEquiv}{t/}{%
+	\IfBooleanTF{#1}{\ppmark[\mathrel]{\not\equiv}}{\ppmark[\mathrel]{\equiv}}}
+\NewDocumentCommand{\ppEquivS}{t/}{%
+	\IfBooleanTF{#1}{\not\equivS}{\equivS}}
+\def\ppBarbedEquiv{\approxeq}
+\newcommand{\ppOb}[1]{\mathord{\downarrow_{#1}}}
+
+%% Typing Rules
+
+%%% T-Link
+\NewDocumentCommand{\ppLINK}{s m m m o}{
+	\AXC{$\strut$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Link}}}{%
+		\RightLabel{\RuleLabel{P}{T-Link}}}
+	\UIC{$\ppLink{#2}{#3} \ppSeq #2 : #4, #3 : \IfValueTF{#5}{#5}{\co{#4}}$}}
+
+%%% T-New
+\NewDocumentCommand{\ppNEW}{s m m m m m o}{
+	\AXC{$#4 \ppSeq #5, #2 : #6, #3 : \IfValueTF{#7}{#7}{\co{#6}}$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Res}}}{%
+		\RightLabel{\RuleLabel{P}{T-Res}}}
+	\UIC{$\ppNew(#2#3)#4 \ppSeq #5$}}
+
+%%% T-Par
+\NewDocumentCommand{\ppPAR}{s m m m m}{
+	\AXC{$#2 \ppSeq #4$}
+	\AXC{$#3 \ppSeq #5$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Par}}}{%
+		\RightLabel{\RuleLabel{P}{T-Par}}}
+	\BIC{$#2\ppPar#3 \ppSeq #4, #5$}}
+
+%%% T-Halt
+\NewDocumentCommand{\ppHALT}{s}{
+	\AXC{$\strut$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Halt}}}{%
+		\RightLabel{\RuleLabel{P}{T-Halt}}}
+	\UIC{$\ppZ \ppSeq \ppSBot$}}
+
+%%% T-Send
+\NewDocumentCommand{\ppSEND}{s m m m m m m m}{
+	\AXC{$#4 \ppSeq #5, #3 : #6, #2 : #8$}
+	\AXC{$#7 < \pr(#5)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Send}}}{%
+		\RightLabel{\RuleLabel{P}{T-Send}}}
+	\BIC{$\ppSend{#2}{#3}.#4 \ppSeq #5, #2 : #6\ppTens^{#7}#8$}}
+
+%%% T-Recv
+\NewDocumentCommand{\ppRECV}{s m m m m m m m}{
+	\AXC{$#4 \ppSeq #5, #3 : #6, #2 : #8$}
+	\AXC{$#7 < \pr(#5)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Recv}}}{%
+		\RightLabel{\RuleLabel{P}{T-Recv}}}
+	\BIC{$\ppRecv{#2}{#3}.#4 \ppSeq #5, #2 : #6\ppParr^{#7}#8$}}
+
+%%% T-Close
+\NewDocumentCommand{\ppCLOSE}{s m m m m}{
+	\AXC{$#3 \ppSeq #4$}
+	\AXC{$#5 < \pr(#4)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Close}}}{%
+		\RightLabel{\RuleLabel{P}{T-Close}}}
+	\BIC{$\ppClose{#2}.#3 \ppSeq #4, #2 : \ppOne^{#5}$}}
+
+%%% T-Wait
+\NewDocumentCommand{\ppWAIT}{s m m m m}{
+	\AXC{$#3 \ppSeq #4$}
+	\AXC{$#5 < \pr(#4)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Wait}}}{%
+		\RightLabel{\RuleLabel{P}{T-Wait}}}
+	\BIC{$\ppWait{#2}.#3 \ppSeq #4, #2 : \ppBot^{#5}$}}
+
+%%% T-Select1
+\NewDocumentCommand{\ppSELECTINL}{s m m m m m m}{
+	\AXC{$#3 \ppSeq #4, #2 : #5$}
+	\AXC{$#6 < \pr(#4)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Select1}}}{%
+		\RightLabel{\RuleLabel{P}[T-Select\textsubscript{1}]{T-Select1}}}
+	\BIC{$\ppSelect{#2}<1.#3 \ppSeq #4, #2 : #5\ppPlus^{#6}#7$}}
+
+%%% T-Select2
+\NewDocumentCommand{\ppSELECTINR}{s m m m m m m}{
+	\AXC{$#3 \ppSeq #4, #2 : #7$}
+	\AXC{$#6 < \pr(#4)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Select2}}}{%
+		\RightLabel{\RuleLabel{P}[T-Select\textsubscript{2}]{T-Select2}}}
+	\BIC{$\ppSelect{#2}<1.#3 \ppSeq #4, #2 : #5\ppPlus^{#6}#7$}}
+
+%%% T-Offer
+\NewDocumentCommand{\ppOFFER}{s m m m m m m m}{
+	\AXC{$#3 \ppSeq #5, #2 : #6$}
+	\AXC{$#4 \ppSeq #5, #2 : #8$}
+	\AXC{$#7 < \pr(#5)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-Offer}}}{%
+		\RightLabel{\RuleLabel{P}{T-Offer}}}
+	\TIC{$\ppOffer{#2}(\ppInl: #3; \ppInr: #4) \ppSeq #5, #2 : #6\ppWith^{#7}#8$}}
+
+%%% T-AbsurdZap
+\NewDocumentCommand{\ppABSURDZAP}{s m m m m}{
+	\AXC{$#3 = \msToSet{\fn(#4)}$}
+	\AXC{$#5 < \pr(#4)$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-T-AbsurdZap}}}{%
+		\RightLabel{\RuleLabel{P}[T-Absurd]{T-AbsurdZap}}}
+	\BIC{$\ppAbsurdZap{#2}{#3} \ppSeq #4, #2 : \ppTop^{#5}$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hypersequent CP & GV (Aliases)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\paperItmcolor}[1]{\ensuremath{{\color[HTML]{a40038}#1}}}
+\newcommand{\paperItycolor}[1]{\ensuremath{{\color[HTML]{00007a}#1}}}
+\def\paperItmcolorname{\paperItmcolor{\text{red}}}%
+\def\paperItycolorname{\paperItycolor{\text{blue}}}%
+
+% Term typing
+\RuleLabelAlias{HGV}{TM-App}%
+{paper:separating-sessions-smoothly.5}
+\RuleLabelAlias{HGV}{TM-LetUnit}%
+{paper:separating-sessions-smoothly.5}
+
+% Term reduction
+\RuleLabelAlias{HGV}{E-Lam}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Unit}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Pair}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Inl}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Inr}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Lift}%
+{paper:separating-sessions-smoothly.7}
+
+% Structural congruence
+\RuleLabelAlias{HGV}{SC-ParAssoc}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{SC-ParComm}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{SC-NewAssoc}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{SC-NewSwap}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{SC-ScopeExt}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{SC-LinkComm}%
+{paper:separating-sessions-smoothly.7}
+
+% Configuration reduction
+\RuleLabelAlias{HGV}{E-Reify-Fork}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Reify-Link}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Comm-Link}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Comm-Send}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Comm-Close}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Res}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Par}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Equiv}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{HGV}{E-Lift-M}%
+{paper:separating-sessions-smoothly.7}
+
+% GV Configuration Typing
+\RuleLabelAlias{GV}[TG-Connect\textsubscript{1}]{TG-Connect1}%
+{paper:separating-sessions-smoothly.13}
+\RuleLabelAlias{GV}[TG-Connect\textsubscript{2}]{TG-Connect2}%
+{paper:separating-sessions-smoothly.13}
+\RuleLabelAlias{GV}[TG-New]{TG-New}%
+{paper:separating-sessions-smoothly.13}
+
+% GV Structural congruence
+\RuleLabelAlias{GV}{SC-ParAssoc}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{GV}{SC-ParComm}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{GV}{SC-NewAssoc}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{GV}{SC-NewSwap}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{GV}{SC-ScopeExt}%
+{paper:separating-sessions-smoothly.7}
+\RuleLabelAlias{GV}{SC-LinkComm}%
+{paper:separating-sessions-smoothly.7}
+
+% HCP lts
+\RuleLabelAlias{HCP}{Act-Pref}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}[Act-Link\textsubscript{1}]{Act-Link1}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}[Act-Link\textsubscript{2}]{Act-Link2}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Act-Off-Inl}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Act-Off-Inr}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Alp-Link}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Bet-Send}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Bet-Close}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Bet-Inl}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Bet-Inr}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Str-Res}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}[Str-Par\textsubscript{1}]{Str-Par1}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}[Str-Par\textsubscript{2}]{Str-Par2}%
+{paper:separating-sessions-smoothly.17}
+\RuleLabelAlias{HCP}{Str-Syn}%
+{paper:separating-sessions-smoothly.17}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Priority Classical Processes (Aliases)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\paperIItmcolor}[1]{\ensuremath{{\color[HTML]{a40038}#1}}}
+\newcommand{\paperIItycolor}[1]{\ensuremath{{\color[HTML]{00007a}#1}}}
+\newcommand{\paperIIprcolor}[1]{\ensuremath{{\color[HTML]{009180}#1}}}
+\def\paperIItmcolorname{\paperIItmcolor{\text{red}}}%
+\def\paperIItycolorname{\paperIItycolor{\text{blue}}}%
+\def\paperIIprcolorname{\paperIIprcolor{\text{green}}}%
+
+\newcommand{\paperIIItmcolor}[1]{\ensuremath{{\color[HTML]{a40038}#1}}}
+\newcommand{\paperIIItycolor}[1]{\ensuremath{{\color[HTML]{00007a}#1}}}
+\newcommand{\paperIIIprcolor}[1]{\ensuremath{{\color[HTML]{009180}#1}}}
+\def\paperIIItmcolorname{\paperIIItmcolor{\text{red}}}%
+\def\paperIIItycolorname{\paperIIItycolor{\text{blue}}}%
+\def\paperIIIprcolorname{\paperIIIprcolor{\text{green}}}%
+
+% Structural Congruences
+\RuleLabelAlias{P}{SC-LinkSwap}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{SC-ResLink}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{SC-ResSwap}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{SC-ResComm}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{SC-ResExt}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{SC-ParNil}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{SC-ParComm}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{SC-ParAssoc}%
+{paper:prioritise-the-best-variation.27}
+% Reduction
+\RuleLabelAlias{P}{E-Link}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{E-Send}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{E-Close}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{E-Select-Inl}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{E-Select-Inr}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{E-LiftRes}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{E-LiftPar}%
+{paper:prioritise-the-best-variation.27}
+\RuleLabelAlias{P}{E-LiftSC}%
+{paper:prioritise-the-best-variation.27}
+% Typing
+\RuleLabelAlias{P}{T-Link}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Res}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Par}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Halt}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Send}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Recv}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Send}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Close}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Wait}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}[T-Select\textsubscript{1}]{T-Select1}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}[T-Select\textsubscript{2}]{T-Select2}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-Offer}%
+{paper:prioritise-the-best-variation.28}
+\RuleLabelAlias{P}{T-AbsurdZap}%
+{paper:prioritise-the-best-variation.28}
+
+% Term typing
+\RuleLabelAlias{PGV}{T-App}%
+{paper:prioritise-the-best-variation.9}
+\RuleLabelAlias{PGV}{T-LetUnit}%
+{paper:prioritise-the-best-variation.9}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Priority Classical Processes (Pre-Typing)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Restricted sequent
+\def\ptrabbrev{\ensuremath{C\!P\!I}}%
+\def\ptrSeq{\mathrel{\vdash_{\ptrabbrev}}}
+\newcommand{\ptrexp}[1]{%
+	\def\oldptabbrev\ptabbrev%
+	\def\ptabbrev\ptrabbrev%
+	#1%
+	\def\ptabbrev\oldptabbrev}
+\def\ptmabbrev{\ensuremath{M\!C\!P\!I}}%
+\def\ptmSeq{\mathrel{\vdash_{\ptmabbrev}}}
+\newcommand{\ptmexp}[1]{%
+	\def\oldptabbrev\ptabbrev%
+	\def\ptabbrev\ptmabbrev%
+	#1%
+	\def\ptabbrev\oldptabbrev}
+
+%% Highlighting
+
+\def\ptabbrev{\ensuremath{P\!I}}%
+\def\ptabbrev{\mathchoice%
+	{\text{PI}}%
+	{\text{PI}}%
+	{\scriptstyle P\!I}%
+	{\scriptscriptstyle P\!I}}
+\def\mathtypt[#1]#2{\mathtmptstyle[#1]{\mathtyptcolor[#2]}}%
+\def\mathtmpt[#1]#2{\mathtmptstyle[#1]{\mathtmptcolor[#2]}}%
+\def\mathprpt[#1]#2{\mathprptstyle[#1]{\mathprptcolor[#2]}}%
+
+\NewDocumentCommand{\ptsetstyle}{m}{%
+\def\ptstyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtyptstyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmptstyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\mathprptstyle[##1]##2{\mathprprimarystyle[##1]{##2}}%
+\def\ptmark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtyptstyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmptstyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\mathprptstyle[##1]##2{\mathprsecondarystyle[##1]{##2}}%
+\def\ptmark[##1]##2{##1{##2_{\ptabbrev}}}%
+}{%
+\def\mathtyptstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+\def\mathtmptstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+\def\mathprptstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+\def\ptmark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'Priority CP' is disabled}{}}%
+}}}
+\NewDocumentCommand{\ptsetcolor}{m}{%
+	\def\ptcolor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtyptcolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmptcolor[##1]{\mathtmprimarycolor[##1]}%
+		\def\mathprptcolor[##1]{\mathprprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtyptcolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmptcolor[##1]{\mathtmsecondarycolor[##1]}%
+			\def\mathprptcolor[##1]{\mathprsecondarycolor[##1]}%
+		}{%
+			\def\mathtyptcolor[##1]{##1}%
+			\def\mathtmptcolor[##1]{##1}%
+			\def\mathprptcolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\ptset}{m}{\ptsetstyle{#1}\ptsetcolor{#1}}
+\NewDocumentCommand{\ptexp}{s m m}{%
+	\def\oldptstyle{\ptstyle}%
+	\def\oldptcolor{\ptcolor}%
+	\IfBooleanTF{#1}{%
+		\ptsetcolor{#2}}{%
+		\ptsetstyle{#2}\ptsetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\ptsetcolor{\oldptcolor}}{%
+		\ptsetstyle{\oldptstyle}\ptsetcolor{\oldptcolor}}}
+
+%%% Priorities: YellowOrange, sans-serif
+\newcommand{\ptpr}[1]{\mathprpt[\mathord]{#1}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\ptty}[1]{\mathtypt[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\pttm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmpt[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmpt[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmpt[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmpt[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmpt[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmpt[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmpt[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmpt[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmpt[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmpt[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmpt[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmpt[\mathclose]{\rangle}}
+												{\ifstrequal{#1}{\cdots}
+													{\mathtmpt[\mathinner]{\cdots}}
+													{\mathtmpt[\mathord]{#1}}
+												}}}}}}}}}}}}}
+
+%% Metavariables
+
+%% Labels
+\NewDocumentCommand{\ptl}{s t' e{^} e{_} t{:} t{\in} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{l%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ptty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ptty{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\ptty{,}}}%
+	}{%
+		\pttm{l%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pttm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pttm{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\pttm{,}}}%
+	}}
+\NewDocumentCommand{\ptk}{s t' e{^} e{_} t{:} t{\in} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{k%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ptty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ptty{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\ptty{,}}}%
+	}{%
+		\pttm{k%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pttm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pttm{\in}}}%
+		\IfBooleanT{#7}{\mathpunct{\pttm{,}}}%
+	}}
+\NewDocumentCommand{\ptL}{s t' e{^} e{_} t{\cup} t{,}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{L%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\ptty{\cup}}}%
+		\IfBooleanT{#6}{\mathpunct{\ptty{,}}}%
+	}{%
+		\pttm{L%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\pttm{\cup}}}%
+		\IfBooleanT{#6}{\mathpunct{\pttm{,}}}%
+	}}
+\NewDocumentCommand{\ptLL}{s t' e{^} e{_}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{\mathcal{L}%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+	}{%
+		\pttm{\mathcal{L}%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+	}}
+\NewDocumentCommand{\pti}{s t' e{^} e{_} t{:} t{\in}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{i%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ptty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ptty{\in}}}%
+	}{%
+		\pttm{i%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pttm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pttm{\in}}}%
+	}}
+\NewDocumentCommand{\ptj}{s t' e{^} e{_} t{:} t{\in}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{j%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\ptty{:}}}%
+		\IfBooleanT{#6}{\mathbin{\ptty{\in}}}%
+	}{%
+		\pttm{j%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathpunct{\pttm{:}}}%
+		\IfBooleanT{#6}{\mathbin{\pttm{\in}}}%
+	}}
+\NewDocumentCommand{\ptI}{s t' e{^} e{_} t{\cup}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{I%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\ptty{\cup}}}%
+	}{%
+		\pttm{I%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\pttm{\cup}}}%
+	}}
+\NewDocumentCommand{\ptJ}{s t' e{^} e{_} t{\cup}}{%
+	\IfBooleanTF{#1}{%
+		\ptty{J%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\ptty{\cup}}}%
+	}{%
+		\pttm{J%
+			\IfValueTF{#3}{^{\IfBooleanT{#2}{\prime}#3}}{\IfBooleanT{#2}{'}}%
+			\IfValueT{#4}{_{#4}}}%
+		\IfBooleanT{#5}{\mathbin{\pttm{\cup}}}%
+	}}
+
+%%% Priorities
+\newcommandPIE\pto[0]{\ptpr{o#1#2#3}}
+\newcommandPIE\ptp[0]{\ptpr{p#1#2#3}}
+\newcommandPIE\ptq[0]{\ptpr{q#1#2#3}}
+\newcommandPIE\ptG[0]{\ptpr{G#1#2#3}}
+\newcommandPIE\ptH[0]{\ptpr{H#1#2#3}}
+
+\NewDocumentCommand{\pts}{t' e{^} e{_} d()}{%
+	\ptpr{σ%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}%
+	\IfValueT{#4}{\lparen#4\rparen}}
+
+%%% Types
+\NewDocumentCommand{\ptA}{t' e{^} e{_}}{%
+	\ptty{%
+		\IfBooleanTF{#1}{\bar{A}}{A}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptB}{t' e{^} e{_}}{%
+	\ptty{%
+		\IfBooleanTF{#1}{\bar{B}}{B}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptC}{t' e{^} e{_}}{%
+	\ptty{%
+		\IfBooleanTF{#1}{\bar{C}}{C}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptD}{t' e{^} e{_}}{%
+	\ptty{%
+		\IfBooleanTF{#1}{\bar{D}}{D}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\pttyCA}{t' e{^} e{_} d[]}{%
+	\ptty{\IfBooleanTF{#1}{\bar{A}}{A}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\ptty\lbrack}%
+		#4%
+		\mathclose{\ptty\rbrack}
+	}{%
+		\mathopen{\ptty\lbrack}%
+		\ptty\cdot%
+		\mathclose{\ptty\rbrack}%
+	}}%
+\NewDocumentCommand{\pttyCB}{t' e{^} e{_} d[]}{%
+	\ptty{\IfBooleanTF{#1}{\bar{B}}{B}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\ptty\lbrack}%
+		#4%
+		\mathclose{\ptty\rbrack}
+	}{%
+		\mathopen{\ptty\lbrack}%
+		\ptty\cdot%
+		\mathclose{\ptty\rbrack}%
+	}}%
+\NewDocumentCommand{\pttyCC}{t' e{^} e{_} d[]}{%
+	\ptty{\IfBooleanTF{#1}{\bar{C}}{C}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\ptty\lbrack}%
+		#4%
+		\mathclose{\ptty\rbrack}
+	}{%
+		\mathopen{\ptty\lbrack}%
+		\ptty\cdot%
+		\mathclose{\ptty\rbrack}%
+	}}%
+\NewDocumentCommand{\pttyCD}{t' e{^} e{_} d[]}{%
+	\ptty{\IfBooleanTF{#1}{\bar{D}}{D}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\ptty\lbrack}%
+		#4%
+		\mathclose{\ptty\rbrack}
+	}{%
+		\mathopen{\ptty\lbrack}%
+		\ptty\cdot%
+		\mathclose{\ptty\rbrack}%
+	}}%
+%%% Environments
+\newcommandPIE\ptGG[0]{\ptty{Γ#1#2#3}}
+\newcommandPIE\ptGD[0]{\ptty{Δ#1#2#3}}
+\NewDocumentCommand{\ptCGG}{t' e{^} e{_} d[]}{%
+	\ptty{\IfBooleanTF{#1}{\bar{Γ}}{Γ}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\ptty\lbrack}%
+		#4%
+		\mathclose{\ptty\rbrack}
+	}{%
+		\mathopen{\ptty\lbrack}%
+		\ptty\cdot%
+		\mathclose{\ptty\rbrack}%
+	}}%
+\NewDocumentCommand{\ptCGD}{t' e{^} e{_} d[]}{%
+	\ptty{\IfBooleanTF{#1}{\bar{Δ}}{Δ}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\ptty\lbrack}%
+		#4%
+		\mathclose{\ptty\rbrack}
+	}{%
+		\mathopen{\ptty\lbrack}%
+		\ptty\cdot%
+		\mathclose{\ptty\rbrack}%
+	}}%
+
+%%% Processes
+\NewDocumentCommand{\pta}{t' e{^} e{_}}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptb}{t' e{^} e{_}}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptc}{t' e{^} e{_}}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptx}{t' e{^} e{_}}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\pty}{t' e{^} e{_}}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptz}{t' e{^} e{_}}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\ptw}{t' e{^} e{_}}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\ptP[0]{\pttm{P#1#2#3}}
+\newcommandPIE\ptQ[0]{\pttm{Q#1#2#3}}
+\newcommandPIE\ptR[0]{\pttm{R#1#2#3}}
+\newcommandPIE\ptS[0]{\pttm{S#1#2#3}}
+\newcommandPIE\ptNM[0]{\pttm{M#1#2#3}}
+\newcommandPIE\ptNN[0]{\pttm{N#1#2#3}}
+\newcommandPIE\ptNK[0]{\pttm{K#1#2#3}}
+\newcommandPIE\ptNW[0]{\pttm{W#1#2#3}}
+
+%%% Process Contexts
+\NewDocumentCommand{\ptPlug}{d[]}{\mathord{\pttm[#1\pttm]}}
+\NewDocumentCommand{\ptCP}{t' e{^} e{_} d[]}{%
+	\pttm{P%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\pttm\lbrack}%
+		#4%
+		\mathclose{\pttm\rbrack}
+	}{%
+		\mathopen{\pttm\lbrack}%
+		\pttm\cdot%
+		\mathclose{\pttm\rbrack}%
+	}}%
+\NewDocumentCommand{\ptCQ}{t' e{^} e{_} d[]}{%
+	\pttm{Q%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\pttm\lbrack}%
+		#4%
+		\mathclose{\pttm\rbrack}
+	}{%
+		\mathopen{\pttm\lbrack}%
+		\pttm\cdot%
+		\mathclose{\pttm\rbrack}%
+	}}%
+\NewDocumentCommand{\ptCR}{t' e{^} e{_} d[]}{%
+	\pttm{R%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueTF{#4}{%
+		\mathopen{\pttm\lbrack}%
+		#4%
+		\mathclose{\pttm\rbrack}
+	}{%
+		\mathopen{\pttm\lbrack}%
+		\pttm\cdot%
+		\mathclose{\pttm\rbrack}%
+	}}%
+\NewDocumentCommand{\ptCC}{t' e{^} e{_} d[]}{%
+	\pttm{\mathcal{C}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pttm\lbrack}#4\mathclose{\pttm\rbrack}}}
+\NewDocumentCommand{\ptCD}{t' e{^} e{_} d[]}{%
+	\pttm{\mathcal{D}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pttm\lbrack}#4\mathclose{\pttm\rbrack}}}
+\NewDocumentCommand{\ptEE}{t' e{^} e{_} d[]}{%
+	\pttm{\mathcal{E}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pttm\lbrack}#4\mathclose{\pttm\rbrack}}}
+\NewDocumentCommand{\ptEF}{t' e{^} e{_} d[]}{%
+	\pttm{\mathcal{F}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\pttm\lbrack}#4\mathclose{\pttm\rbrack}}}
+
+%%% Label
+\def\ptLabPar{\mathrel{\pttm{\parallel}}}
+\newcommandPIE\ptLab[0]{\pttm{\ell#1#2#3}}
+\NewDocumentCommand{\ptAct}{t' e{^} e{_} t.}{%
+	\pttm{%
+		\IfBooleanTF{#1}{\bar{π}}{π}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}
+		\IfBooleanT{#4}{\mathpunct{.}}
+	}}
+\newcommandPIE\ptTau[0]{\pttm{τ#1#2#3}}
+
+%% Types
+\newcommandPIE\ptOne[0]{\ptty{\llOne#1#2#3}}
+\newcommandPIE\ptNil[0]{\ptty{\llNil#1#2#3}}
+\newcommandPIE\ptTop[0]{\ptty{\llTop#1#2#3}}
+\newcommandPIE\ptBot[0]{\ptty{\llBot#1#2#3}}
+\newcommandPIE\ptImpl[0]{\mathbin{\ptty{\llImpl#1#2#3}}}
+\newcommandPIE\ptBiImpl[0]{\mathbin{\ptty{\llBiImpl#1#2#3}}}
+\newcommandPIE\ptTens[0]{\mathbin{\ptty{\llTens#1#2#3}}}
+\newcommandPIE\ptParr[0]{\mathbin{\ptty{\llParr#1#2#3}}}
+\newcommandPIE\ptPlus[0]{\mathbin{\ptty{\llPlus#1#2#3}}}
+\newcommandPIE\ptWith[0]{\mathbin{\ptty{\llWith#1#2#3}}}
+\def\pttyEquiv{\approx}%
+\def\pttyDual{\sim}%
+
+\def\ptBigPlusOp{%
+	\mathop{\mathchoice%
+		{\ptty{\bigoplus}}%
+		{\ptty{\bigoplus}}%
+		{\ptty{\bigoplus}}%
+		{\ptty{\bigoplus}}%
+	}}
+\NewDocumentCommand{\ptBigPlus}{t' e{^} e{_} >{\SplitList{;}} m}{%
+	\ptty{\ptBigPlusOp%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\mathopen{\ptty{\lbrace}}
+	\def\ptAlt{\ptty{;}}%
+	\ProcessList{#4}{\ptAltListAdd}\ptAltListUse%
+	\mathclose{\ptty{\rbrace}}}
+\def\ptBigWithOp{%
+	\mathop{\mathchoice%
+		{\ptty{\bigwith}}%
+		{\ptty{\bigwith}}%
+		{\ptty{\bigwith}}%
+		{\ptty{\bigwith}}%
+	}}
+\NewDocumentCommand{\ptBigWith}{t' e{^} e{_} >{\SplitList{;}} m}{%
+	\ptty{\ptBigWithOp%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\mathopen{\ptty{\lbrace}}
+	\def\ptAlt{\ptty{;}}%
+	\ProcessList{#4}{\ptAltListAdd}\ptAltListUse%
+	\mathclose{\ptty{\rbrace}}}
+
+%% Environments
+\def\ptSBot{\llSBot}
+\def\ptSParr{\llSParr}
+
+%% Processes
+\NewDocumentCommand{\ptNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\pttm(\ptNew#1\pttm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\pttm{\lparen}#2\pttm{\rparen}}
+		}}{%
+		\pttm{\text{ν}}}}
+\def\ptPar{\mathrel{\pttm\parallel}}
+\NewDocumentCommand{\ptParSplit}{m m}{\mathrel{{}_{#1}{\ptPar}_{#2}}}
+\DeclareMathOperator*{\ptBigPar}{\pttm{\bigparallel}}
+\def\ptAlt{\mathpunct{\pttm{;}}}
+\newcommand{\ptLink}[3][]{\overset{#1}{#2{\pttm\leftrightarrow}#3}}
+\NewDocumentCommand{\ptSend}{m m t. d()}{%
+	#1\pttm[#2\pttm]\IfBooleanT{#3}{\pttm.}\IfValueT{#4}{\pttm(#4\pttm)}}
+\NewDocumentCommand{\ptUSend}{m m t. d()}{%
+	#1\mathopen{\pttm{\langle}}#2\mathclose{\pttm{\rangle}}\IfBooleanT{#3}{\pttm.}\IfValueT{#4}{\pttm(#4\pttm)}}
+\NewDocumentCommand{\ptRecv}{m m t.}{%
+	#1\pttm(#2\pttm)\IfBooleanT{#3}{\pttm.}}
+\NewDocumentCommand{\ptClose}{m t. t0}{%
+	\ptSend{#1}{}\IfBooleanT{#2}{\pttm. \IfBooleanT{#3}{\ptZ}}}
+\NewDocumentCommand{\ptWait}{m t.}{%
+	\ptRecv{#1}{}\IfBooleanT{#2}{\pttm.}}
+\NewDocumentCommand{\ptInl}{t:}{%
+	\pttm{\text{inl}}\IfBooleanT{#1}{\pttm:\:}}
+\NewDocumentCommand{\ptInr}{t:}{%
+	\pttm{\text{inr}}\IfBooleanT{#1}{\pttm:\:}}
+\NewDocumentCommand{\ptSelect}{m e{<} t.}{%
+	#1\,\scaleobj{0.75}{\pttm{\triangleleft}}\:%
+	\ifstrequal{#2}{1}{\ptInl}{\ifstrequal{#2}{2}{\ptInr}{#2}}%
+	\IfBooleanT{#3}{\pttm.}}
+\NewDocumentCommand{\ptOffer}{m e{>} t{.} >{\SplitList{;}} d()}{%
+	#1\:\scaleobj{0.75}{\pttm{\triangleright}}\,%
+	\IfValueTF{#2}{%
+		\ifstrequal{#2}{1}{\ptInl}{\ifstrequal{#2}{2}{\ptInr}{#2}}%
+		\IfBooleanT{#3}{\pttm{.}}%
+	}{%
+		\IfValueT{#4}{\pttm\{\ProcessList{#4}{\ptAltListAdd}\ptAltListUse\pttm\}}}}
+\newcommand{\ptAbsurd}[1]{\ptOffer{#1}()}
+\newcommand{\ptSubst}[2]{\mathord{\pttm\{#1\pttm/#2\pttm\}}}
+\newcommand{\ptSum}[0]{\mathbin{\pttm{+}}}
+
+% `\ptZap`: Zap symbol
+\newcommand{\ptZap}{\mathop{\pttm{\lightning}}}
+
+% `\ptZop`: Zop symbol
+\newcommand{\ptZop}{\mathop{\mathchoice%
+		{\rotatebox[origin=c]{180}{$\ptZap$}}%
+		{\rotatebox[origin=c]{180}{$\ptZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptstyle\ptZap$}}%
+		{\rotatebox[origin=c]{180}{$\scriptscriptstyle\ptZap$}}}}
+
+%%% `\ptZ`: Terminated process (* for marking)
+\NewDocumentCommand{\ptZ}{s}{%
+	\IfBooleanTF{#1}{%
+		\pttm{\mathrlap{0}{-}}%
+	}{%
+		\pttm{0}%
+	}}%
+
+%%% Actions
+\newcommand{\ptKill}[1]{\mathord{\ptZop}#1}
+\newcommand{\ptDie}[1]{#1\mathord{\ptZop}}
+\newcommand{\ptKilled}[1]{\mathord{\ptZap}#1}
+\newcommand{\ptDied}[1]{#1\mathord{\ptZap}}
+
+\NewDocumentCommand{\ptZapper}{>{\SplitList{,}} m}{%
+	\mathord{\ptZap}%
+	\def\ptAlt{\pttm,}%
+	\ProcessList{#1}{\ptAltListAdd}\ptAltListUse%
+}
+
+% `\ptZapperNKW`: Alternative to `\ptAbsurd`
+\NewDocumentCommand{\ptZapperNKW}{
+	>{\SplitList{,}} m
+	>{\SplitList{,}} o
+	>{\SplitList{,}} o}{
+	\def\ptAlt{\pttm,}%
+	\ProcessList{#1}{\ptAltListAdd}\ptAltListUse%
+	\mathbin{\ptZap}%
+	\IfValueTF{#2}{\ProcessList{#2}{\ptAltListAdd}\ptAltListUse}{\pttm\emptyset}%
+	\pttm;%
+	\IfValueTF{#3}{\ProcessList{#3}{\ptAltListAdd}\ptAltListUse}{\pttm\emptyset}%
+}
+
+
+% `\ptAbsurdZap`: Alternative to `\ptAbsurd`
+\NewDocumentCommand{\ptAbsurdZap}{m >{\SplitList{,}} m}{
+	#1\ptZap%
+	\def\ptAlt{\pttm,}%
+	\ProcessList{#2}{\ptAltListAdd}\ptAltListUse
+}%
+
+% `\ptAbsurdZop`: Dual to `\ptAbsurdZap`
+\NewDocumentCommand{\ptAbsurdZop}{m >{\SplitList{,}} m}{
+	#1\ptZop%
+	\def\ptAlt{\pttm,}%
+	\ProcessList{#2}{\ptAltListAdd}\ptAltListUse
+}%
+
+\ExplSyntaxOn
+% `\ptAltListAdd`: Add alternative process
+\tl_new:N \l_pt_alt_list_temp_tl%
+\newcommand{\ptAltListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_pt_alt_list_temp_tl {
+			\tl_put_right:Nn \l_pt_alt_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_pt_alt_list_temp_tl { \ptAlt~#1 }
+		}
+	}
+}
+% `\ptAltListUse`: Use alternative processes
+\newcommand{\ptAltListUse}{
+	\tl_use:N \l_pt_alt_list_temp_tl
+	\tl_set:Nn \l_pt_alt_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+% `\ptInterleave`: N-ary interleave relation
+\def\ptInterleaveOp{\mathrel{\sim}}
+\NewDocumentCommand{\ptInterleave}{>{\SplitList{~}} m m}{%
+	\ProcessList{#1}{\ptInterleaveListAdd}\ptInterleaveListUse = #2}%
+
+\ExplSyntaxOn
+\tl_new:N \l_pt_interleave_list_temp_tl%
+% `\ptInterleaveListAdd`: Add evaluation context
+\newcommand{\ptInterleaveListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_pt_interleave_list_temp_tl {
+			\tl_put_right:Nn \l_pt_interleave_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_pt_interleave_list_temp_tl { \ptInterleaveOp~#1 }
+		}
+	}
+}
+% `\ptInterleaveListUse`: Use evaluation contexts
+\newcommand{\ptInterleaveListUse}{
+	\tl_use:N \l_pt_interleave_list_temp_tl
+	\tl_set:Nn \l_pt_interleave_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+%% Contexts
+\newcommandPIE\ptHole[0]{\pttm{\Box#1#2#3}}
+\newcommandPIE\pttyHole[0]{\ptty{\Box#1#2#3}}
+\NewDocumentCommand{\ptCtxInv}{m}{{#1}^{-1}}
+
+%% Graphs
+\newcommandPIE{\ptV}[0]{V#1#2#3}%
+\def\rooting{\mathrel{\prec}}%
+\newcommand{\prTree}[1]{T_{#1}}
+\newcommand{\ptBiPartite}[2]{L_{#1,#2}}
+\newcommand{\ptLinkTree}[2]{T_{#1,#2}}
+\newcommand{\connectedGraphOf}[1]{K_{#1}}
+\newcommand{\emptyGraphOf}[1]{\bar{K}_{#1}}
+\def\nullGraph{\emptyset}%
+
+%% Relations
+\def\ptSeq{\ptmark[\mathrel]{\vdash}}
+\def\ptGives{\mathrel{\vert}}
+\NewDocumentCommand{\ptTo}{m}{\xrightarrow{\ensuremath{#1}}}
+\def\ptTTo{\xrightarrow{\ensuremath{\ptTau}}}
+\NewDocumentCommand{\ptBigDis}{d() e{^} e{_}}{%
+	\mathopen{\lwiggle}%
+	\IfValueTF{#1}{#1}{\cdot}%
+	\mathclose{\rwiggle}%
+	\IfValueT{#2}{^{#2}}%
+	\IfValueT{#3}{_{#3}}}
+\NewDocumentCommand{\ptDis}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\rightsquigarrow}{\rightsquigarrow}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ptEval}{s t+ t/}{%
+	\IfBooleanTF{#3}{\ptmark[\mathrel]{\not\Longrightarrow}}{\ptmark[\mathrel]{\Longrightarrow}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ptEvalS}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\Longrightarrow_{S}}{\Longrightarrow_{S}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ptEvalA}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\Longrightarrow_{\alpha}}{\Longrightarrow_{\alpha}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ptEvalB}{s t+ t/}{%
+	\IfBooleanTF{#3}{\not\Longrightarrow_{\beta}}{\Longrightarrow_{\beta}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\ptEquiv}{t/}{%
+	\IfBooleanTF{#1}{\ptmark[\mathrel]{\not\equiv}}{\ptmark[\mathrel]{\equiv}}}
+\NewDocumentCommand{\ptEquivS}{t/}{%
+	\IfBooleanTF{#1}{\not\equivS}{\equivS}}
+\def\ptBarbedEquiv{\approxeq}
+\newcommand{\ptOb}[1]{\mathord{\downarrow_{#1}}}
+
+%% Typing Rules
+
+%%% PI-Link
+\NewDocumentCommand{\ptLINK}{s m m m o}{
+	\AXC{$\strut$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Link}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Link}}}
+	\UIC{$
+			\ptLink{#2}{#3}
+			\ptSeq
+			#2 : #4, #3 : \IfValueTF{#5}{#5}{\co{#4}}
+			\ptGives
+			\ptBiPartite{#4}{\IfValueTF{#5}{#5}{\co{#4}}}
+		$}}
+\RuleLabelAlias{P}{CPI-Link}{rule:P-PI-Link}
+\NewDocumentCommand{\ptrLINK}{s m m m o}{
+	\AXC{$\strut$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-CPI-Link}}}{%
+		\RightLabel{\RuleLabel{P}{CPI-Link}}}
+	\UIC{$
+			\ptLink{#2}{#3}
+			\ptrSeq
+			#2 : #4, #3 : \IfValueTF{#5}{#5}{\co{#4}}
+			\ptGives
+			\ptLinkTree{#4}{\IfValueTF{#5}{#5}{\co{#4}}}
+		$}}
+
+%%% PI-New
+\NewDocumentCommand{\ptNEW}{s m m m m m o m}{
+	\AXC{$
+			#4
+			\ptSeq
+			#5, #2 : #6, #3 : \IfValueTF{#7}{#7}{\co{#6}}
+			\ptGives
+			#8
+		$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Res}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Res}}}
+	\UIC{$
+			\ptNew(#2#3)#4
+			\ptSeq
+			#5
+			\ptGives
+			\ptBiPartite{#6}{\IfValueTF{#7}{#7}{\co{#6}}}\cup#8
+		$}}
+
+%%% PI-Par
+\NewDocumentCommand{\ptPAR}{s m m m m m m}{
+	\AXC{$#2 \ptSeq #4 \ptGives #6$}
+	\AXC{$#3 \ptSeq #5 \ptGives #7$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Par}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Par}}}
+	\BIC{$#2\ptPar#3 \ptSeq #4, #5 \ptGives #6 \cup #7$}}
+
+%%% PI-Halt
+\NewDocumentCommand{\ptHALT}{s}{
+	\AXC{$\strut$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Halt}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Halt}}}
+	\UIC{$\ptZ \ptSeq \ptSBot \ptGives \emptyGraphOf{\emptyset}$}}
+
+%%% PI-Send
+\NewDocumentCommand{\ptSEND}{s m m m m m m m m}{
+	\AXC{$
+			#4
+			\ptSeq
+			#5, #3 : #6, #2 : #8
+			\ptGives
+			#9
+		$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Send}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Send}}}
+	\UIC{$
+			\ptSend{#2}{#3}.#4
+			\ptSeq
+			#5, #2 : #6\ptTens^{#7}#8
+			\ptGives
+			#7\rooting#9
+		$}}
+
+%%% PI-Recv
+\NewDocumentCommand{\ptRECV}{s m m m m m m m m}{
+	\AXC{$
+			#4
+			\ptSeq
+			#5, #3 : #6, #2 : #8
+			\ptGives
+			#9
+		$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Recv}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Recv}}}
+	\UIC{$
+			\ptRecv{#2}{#3}.#4
+			\ptSeq
+			#5, #2 : #6\ptParr^{#7}#8
+			\ptGives
+			#7\rooting#9
+		$}}
+\RuleLabelAlias{P}{CPI-Recv}{rule:P-PI-Recv}
+\NewDocumentCommand{\ptrRECV}{s m m m m m m m m}{
+	\AXC{$
+			#4
+			\ptrSeq
+			#5, #3 : #6, #2 : #8
+			\ptGives
+			#9
+		$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Recv}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Recv}}}
+	\UIC{$
+			\ptRecv{#2}{#3}.#4
+			\ptrSeq
+			#5, #2 : #6\ptParr^{#7}#8
+			\ptGives
+			#7\rooting#9
+		$}}
+%%% PI-Close
+\NewDocumentCommand{\ptCLOSE}{s m m m m m}{
+	\AXC{$#3 \ptSeq #4 \ptGives #6$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Close}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Close}}}
+	\UIC{$
+			\ptClose{#2}.#3
+			\ptSeq
+			#4, #2 : \ptOne^{#5}
+			\ptGives
+			#5\rooting#6
+		$}}
+\RuleLabelAlias{P}{CPI-Close}{rule:P-PI-Close}
+
+%%% PI-Wait
+\NewDocumentCommand{\ptWAIT}{s m m m m m}{
+	\AXC{$#3 \ptSeq #4 \ptGives #6$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Wait}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Wait}}}
+	\UIC{$
+			\ptWait{#2}.#3
+			\ptSeq
+			#4, #2 : \ptBot^{#5}
+			\ptGives
+			#5\rooting#6
+		$}}
+\RuleLabelAlias{P}{CPI-Wait}{rule:P-PI-Wait}
+
+%%% PI-Select1
+\NewDocumentCommand{\ptSELECTINL}{s m m m m m m m}{
+	\AXC{$#3 \ptSeq #4, #2 : #5 \ptGives #8$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Select1}}}{%
+		\RightLabel{\RuleLabel{P}[PI-Select\textsubscript{1}]{PI-Select1}}}
+	\UIC{$
+			\ptSelect{#2}<1.#3
+			\ptSeq
+			#4, #2 : #5\ptPlus^{#6}#7
+			\ptGives
+			#6\rooting#8
+		$}}
+
+%%% PI-Select2
+\NewDocumentCommand{\ptSELECTINR}{s m m m m m m m}{
+	\AXC{$#3 \ptSeq #4, #2 : #7 \ptGives #8$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Select1}}}{%
+		\RightLabel{\RuleLabel{P}[PI-Select\textsubscript{2}]{PI-Select2}}}
+	\UIC{$
+			\ptSelect{#2}<2.#3
+			\ptSeq
+			#4, #2 : #5\ptPlus^{#6}#7
+			\ptGives
+			#6\rooting#8
+		$}}
+
+%%% PI-Offer
+\NewDocumentCommand{\ptOFFER}{s m m m m m m m m}{
+	\AXC{$#3 \ptSeq #5, #2 : #6 \ptGives #9_1$}
+	\AXC{$#4 \ptSeq #5, #2 : #8 \ptGives #9_2$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-Offer}}}{%
+		\RightLabel{\RuleLabel{P}{PI-Offer}}}
+	\BIC{$
+			\ptOffer{#2}(\ptInl: #3; \ptInr: #4)
+			\ptSeq
+			#5, #2 : #6\ptWith^{#7}#8
+			\ptGives
+			#7\rooting(#9_1\cup#9_2)
+		$}}
+
+%%% PI-AbsurdZap
+\NewDocumentCommand{\ptABSURDZAP}{s m m m m o}{
+	\AXC{$#3 = \msToSet{\fn(#4)}$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-PI-AbsurdZap}}}{%
+		\RightLabel{\RuleLabel{P}[PI-Absurd]{PI-AbsurdZap}}}
+	\UIC{$
+			\ptAbsurdZap{#2}{#3}
+			\ptSeq
+			#4, #2 : \ptTop^{#5}
+			\ptGives
+			\emptyGraphOf{\fn(#4, #2 : \ptTop^{#5})}
+		$}}
+\RuleLabelAlias{P}{CPI-AbsurdZap}{rule:P-PI-AbsurdZap}
+\NewDocumentCommand{\ptrABSURDZAP}{s m m m m}{
+	\AXC{$#3 = \msToSet{\fn(#4)}$}
+	\IfBooleanTF{#1}{%
+		\RightLabel{\Rule{P-CPI-AbsurdZap}}}{%
+		\RightLabel{\RuleLabel{P}[CPI-Absurd]{PI-CAbsurdZap}}}
+	\UIC{$
+			\ptAbsurdZap{#2}{#3}
+			\ptrSeq
+			#4, #2 : \ptTop^{#5}
+			\ptGives
+			#5\rooting\emptyGraphOf{\fp(#4)}
+		$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Good Variation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\GV{GV}
+\def\fgGV{\text{GV}\ensuremath{*}}
+
+%% Highlighting
+
+\def\gvabbrev{\mathchoice%
+	{\text{GV}}%
+	{\text{GV}}%
+	{\scriptstyle G\!V}%
+	{\scriptscriptstyle G\!V}}
+\def\mathtygv[#1]#2{\mathtmgvstyle[#1]{\mathtygvcolor[#2]}}%
+\def\mathtmgv[#1]#2{\mathtmgvstyle[#1]{\mathtmgvcolor[#2]}}%
+\def\mathprgv[#1]#2{\mathprgvstyle[#1]{\mathprgvcolor[#2]}}%
+
+\NewDocumentCommand{\gvsetstyle}{m}{%
+\def\gvstyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtygvstyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmgvstyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\mathprgvstyle[##1]##2{\mathprprimarystyle[##1]{##2}}%
+\def\gvmark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtygvstyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmgvstyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\mathprgvstyle[##1]##2{\mathprsecondarystyle[##1]{##2}}%
+\def\gvmark[##1]##2{##1{##2_{\gvabbrev}}}%
+}{%
+\def\mathtygvstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'GV' is disabled}{}}%
+\def\mathtmgvstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'GV' is disabled}{}}%
+\def\mathprgvstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'GV' is disabled}{}}%
+\def\gvmark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'GV' is disabled}{}}%
+}}}
+\NewDocumentCommand{\gvsetcolor}{m}{%
+	\def\gvColor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtygvcolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmgvcolor[##1]{\mathtmprimarycolor[##1]}%
+		\def\mathprgvcolor[##1]{\mathprprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtygvcolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmgvcolor[##1]{\mathtmsecondarycolor[##1]}%
+			\def\mathprgvcolor[##1]{\mathprsecondarycolor[##1]}%
+		}{%
+			\def\mathtygvcolor[##1]{##1}%
+			\def\mathtmgvcolor[##1]{##1}%
+			\def\mathprgvcolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\gvset}{m}{\gvsetstyle{#1}\gvsetcolor{#1}}
+\NewDocumentCommand{\gvexp}{s m m}{%
+	\def\oldgvstyle{\gvstyle}%
+	\def\oldgvcolor{\gvColor}%
+	\IfBooleanTF{#1}{%
+		\gvsetcolor{#2}}{%
+		\gvsetstyle{#2}\gvsetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\gvsetcolor{\oldgvcolor}}{%
+		\gvsetstyle{\oldgvstyle}\gvsetcolor{\oldgvcolor}}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\gvty}[1]{\mathtygv[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\gvtm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmgv[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmgv[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmgv[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmgv[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmgv[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmgv[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmgv[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmgv[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmgv[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmgv[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmgv[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmgv[\mathclose]{\rangle}}
+												{\ifstrequal{#1}{\cdots}
+													{\mathtmgv[\mathinner]{\cdots}}
+													{\mathtmgv[\mathord]{#1}}
+												}}}}}}}}}}}}}
+
+%%% Priorities: YellowOrange, sans-serif
+\newcommand{\gvpr}[1]{\mathprgv[\mathord]{#1}}
+
+
+%% Metavariables
+
+%%% Thread Flags
+\newcommandPIE\gvphi[0]{\gvtm{ϕ#1#2#3}}
+\newcommandPIE\gvpsi[0]{\gvtm{ψ#1#2#3}}
+
+%%% Types
+\newcommandPIE\gvQ[0]{\gvty{Q#1#2#3}}
+\newcommandPIE\gvR[0]{\gvty{R#1#2#3}}
+\newcommandPIE\gvS[0]{\gvty{S#1#2#3}}
+\newcommandPIE\gvT[0]{\gvty{T#1#2#3}}
+\newcommandPIE\gvU[0]{\gvty{U#1#2#3}}
+\newcommandPIE\gvG[0]{\gvty{G#1#2#3}}
+
+%%% Terms
+\NewDocumentCommand{\gva}{t' e{^} e{_}}{%
+	\gvtm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\gvb}{t' e{^} e{_}}{%
+	\gvtm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\gvc}{t' e{^} e{_}}{%
+	\gvtm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\gvx}{t' e{^} e{_}}{%
+	\gvtm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\gvy}{t' e{^} e{_}}{%
+	\gvtm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\gvz}{t' e{^} e{_}}{%
+	\gvtm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\gvw}{t' e{^} e{_}}{%
+	\gvtm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\gvf[0]{\gvtm{f#1#2#3}}
+\newcommandPIE\gvg[0]{\gvtm{g#1#2#3}}
+\newcommandPIE\gvh[0]{\gvtm{h#1#2#3}}
+\newcommandPIE\gvK[0]{\gvtm{K#1#2#3}}
+\newcommandPIE\gvL[0]{\gvtm{L#1#2#3}}
+\newcommandPIE\gvM[0]{\gvtm{M#1#2#3}}
+\newcommandPIE\gvN[0]{\gvtm{N#1#2#3}}
+\newcommandPIE\gvV[0]{\gvtm{V#1#2#3}}
+\newcommandPIE\gvW[0]{\gvtm{W#1#2#3}}
+\NewDocumentCommand{\gvEE}{t' e{^} e{_} d[]}{%
+	\gvtm{\mathcal{E}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\gvtm\lbrack}#4\mathclose{\gvtm\rbrack}}}
+\NewDocumentCommand{\gvEF}{t' e{^} e{_} d[]}{%
+	\gvtm{\mathcal{F}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\gvtm\lbrack}#4\mathclose{\gvtm\rbrack}}}
+\NewDocumentCommand{\gvE}{t' e{^} e{_} d[]}{%
+	\gvtm{E%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\gvtm\lbrack}#4\mathclose{\gvtm\rbrack}}}
+\NewDocumentCommand{\gvF}{t' e{^} e{_} d[]}{%
+	\gvtm{F%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\gvtm\lbrack}#4\mathclose{\gvtm\rbrack}}}
+
+%%% Priorities
+\newcommandPIE\gvo[0]{\gvpr{o#1#2#3}}
+\newcommandPIE\gvp[0]{\gvpr{p#1#2#3}}
+\newcommandPIE\gvq[0]{\gvpr{q#1#2#3}}
+\newcommand\gvMax[0]{\mathbin{\gvpr{\sqcup}}}
+\newcommand\gvMin[0]{\mathbin{\gvpr{\sqcap}}}
+\newcommand\gvTop[0]{\gvpr{\top}}
+\newcommand\gvBot[0]{\gvpr{\bot}}
+
+%%% Configurations
+\newcommandPIE\gvC[0]{\gvtm{C#1#2#3}}
+\newcommandPIE\gvD[0]{\gvtm{D#1#2#3}}
+\newcommandPIE\gvCC[0]{\gvtm{\mathcal{C}#1#2#3}}
+\newcommandPIE\gvCD[0]{\gvtm{\mathcal{D}#1#2#3}}
+
+%% Contexts
+\newcommandPIE\gvHole[0]{\gvtm{\Box#1#2#3}}
+
+%% Threads & Thread Flags
+\newcommandPIE\gvTT[0]{\gvtm{\mathcal{T}#1#2#3}}
+\newcommandPIE\gvTA[0]{\gvtm{\mathcal{A}#1#2#3}}
+\def\labMain{\vcenter{\hbox{\scaleobj{0.6}{●}}}}
+\def\labChild{\vcenter{\hbox{\scaleobj{0.6}{○}}}}
+\newcommand{\gvMain}[0]{\mathop{\gvtm{\labMain}}}
+\newcommand{\gvChild}[0]{\mathop{\gvtm{\labChild}}}
+\def\gvCJoin{\sqcap}
+
+%% Types
+\def\gvtyUnit{\gvty{\mathbf{1}}}
+\def\gvtyVoid{\gvty{\mathbf{0}}}
+\def\gvtyPair{\mathbin{\gvty{\times}}}
+\def\gvtySum{\mathbin{\gvty{+}}}
+\NewDocumentCommand{\gvtyFun}{>{\SplitList{,}} o}{%
+  \mathbin{%
+    \gvty{\multimap}%
+		\IfValueT{#1}{%
+			\def\gvItemSep{\mathpunct{\gvpr{,}}}%
+			^{\ProcessList{#1}{\gvItemListAdd}\gvAltItemListUse}%
+  }}}
+\def\gvtyQual{\mathbin{\gvty{\Rightarrow}}}
+
+%%% Environments
+\newcommandPIE\gvGG[0]{\gvty{Γ#1#2#3}}
+\newcommandPIE\gvGD[0]{\gvty{Δ#1#2#3}}
+\newcommandPIE\gvGT[0]{\gvty{Θ#1#2#3}}
+\newcommandPIE\gvHG[0]{\gvty{\mathcal{G}#1#2#3}}
+\newcommandPIE\gvHH[0]{\gvty{\mathcal{H}#1#2#3}}
+\def\gvHTens{\llHTens}
+
+%% Session Types
+\newcommandPIE\gvtySend[1]{\gvty{!}#2#3#4#1\gvty{.}}
+\newcommandPIE\gvtyRecv[1]{\gvty{?}#2#3#4#1\gvty{.}}
+\NewDocumentCommand{\gvtyEnd}{t! t? o}{%
+	\gvty{\text{end}}
+	\IfValueT{#3}{^{#3}}
+	\IfBooleanTF{#1}{_{\gvty{!}}}{\IfBooleanT{#2}{_{\gvty{?}}}}
+}
+\newcommandPIE\gvtyPlus[0]{\mathbin{\gvty{\llPlus}}}
+\newcommandPIE\gvtyWith[0]{\mathbin{\gvty{\llWith}}}
+\newcommandPIE\gvtyTop[0]{\gvty{\llWith}\gvty\lbrace\gvty\rbrace}
+\newcommandPIE\gvtyNil[0]{\gvty{\llPlus}\gvty\lbrace\gvty\rbrace}
+
+%% Lock Types
+\newcommand{\gvtyLock}[1]{#1^{\gvty{\#}}}
+\newcommand{\gvLock}[2]{\gvtm{\langle}#1\gvtm{,}#2\gvtm{\rangle}}
+
+%% Runtime Types
+\def\gvtyMain{\mathop{\gvty{\labMain}}}
+\def\gvtyChild{\mathop{\gvty{\labChild}}}
+
+%% Terms
+\NewDocumentCommand{\gvLam}{d() t.}{%
+	\mathord{\gvtm{λ}}%
+	\IfValueT{#1}{#1}%
+	\IfBooleanT{#2}{\gvtm{.}}%
+}
+% \def\gvLam{\gvtm{λ}}
+\NewDocumentCommand{\gvApp}{d()}{%
+	\;%
+	\IfValueT{#1}{%
+		\gvtm\lparen%
+		#1%
+		\gvtm\rparen%
+	}%
+}
+\def\gvAndThen{\mathpunct{\gvtm{;}}}
+\NewDocumentCommand{\gvLet}{>{\SplitList{,}} d() t=}{%
+	\mathord{\gvtm{\text{let}}}%
+	\IfValueT{#1}{%
+		\:%
+		\def\gvItemSep{\mathpunct{\gvtm{,}}}%
+		\ProcessList{#1}{\gvItemListAdd}\gvLetItemListUse%
+		\IfBooleanT{#2}{\mathrel{\gvtm{=}}}%
+	}%
+}
+\NewDocumentCommand{\gvPair}{>{\SplitList{,}} d()}{%
+	\IfValueT{#1}{%
+		\def\gvItemSep{\mathpunct{\gvtm{,}}}%
+		\ProcessList{#1}{\gvItemListAdd}\gvLetItemListUse%
+	}%
+}
+\NewDocumentCommand{\gvCase}{m >{\SplitList{;}} d()}{%
+	\mathord{\gvtm{\text{case}}}%
+	\gvApp%
+	#1%
+	\IfValueT{#2}{%
+		\:%
+		\gvtm{\lbrace}%
+		\def\gvItemSep{\mathpunct{\gvtm{;}}}%
+		\ProcessList{#2}{\gvItemListAdd}\gvAltItemListUse%
+		\gvtm{\rbrace}%
+	}}
+\def\gvAbsurd{\gvtm{\text{absurd}}}
+\def\gvBe{\mathrel{\gvtm{=}}}
+\def\gvIn{\mathrel{\gvtm{\text{in}}}}
+\def\gvUnit{\gvtm(\gvtm)}
+\NewDocumentCommand{\gvInl}{m t:}{%
+	\mathop{\gvtm{\text{inl}}}%
+	#1%
+	\IfBooleanT{#2}{\mathbin{\gvtm{\mapsto}}}
+}
+\NewDocumentCommand{\gvInr}{m t:}{%
+	\mathop{\gvtm{\text{inr}}}%
+	#1%
+	\IfBooleanT{#2}{\mathbin{\gvtm{\mapsto}}}
+}
+\def\gvOf{\:}
+\def\gvAbsurd{\gvtm{\text{absurd}}}
+\def\gvLink{\gvtm{\text{link}}}
+\def\gvNew{\gvtm{\text{new}}}
+\def\gvSpawn{\gvtm{\text{spawn}}}
+\def\gvFork{\gvtm{\text{fork}}}
+\def\gvConnect{\gvtm{\text{connect}}}
+\def\gvSend{\gvtm{\text{send}}}
+\def\gvRecv{\gvtm{\text{recv}}}
+\def\gvClose{\gvtm{\text{close}}}
+\def\gvWait{\gvtm{\text{wait}}}
+\def\gvSelect{\gvtm{\text{select}}}
+\def\gvSelectInl{\gvSelect\gvApp{\gvInl{}}}
+\def\gvSelectInr{\gvSelect\gvApp{\gvInr{}}}
+\def\gvLbl{\gvtm{\ell}}
+\NewDocumentCommand{\gvSendClass}{d()}{%
+	\gvty{\text{Send}}%
+	\IfValueT{#1}{\gvty(#1\gvty)}}
+
+\NewDocumentCommand{\gvOffer}{m >{\SplitList{;}} d()}{%
+	\mathord{\gvtm{\text{offer}}}%
+	\:%
+	#1%
+	\IfValueT{#2}{%
+		\:%
+		\gvtm{\lbrace}%
+		\def\gvItemSep{\mathpunct{\gvtm{;}}}%
+		\ProcessList{#2}{\gvItemListAdd}\gvAltItemListUse%
+		\gvtm{\rbrace}%
+	}%
+}
+
+%% Comma-separated items
+\ExplSyntaxOn
+\tl_new:N \l_gv_item_list_temp_tl%
+\newcommand{\gvItemListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_gv_item_list_temp_tl {
+			\tl_put_right:Nn \l_gv_item_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_gv_item_list_temp_tl { \gvItemSep~#1 }
+		}
+	}
+}
+\ExplSyntaxOff
+\ExplSyntaxOn
+\newcommand{\gvLetItemListUse}[0]{
+	\int_compare:nNnF {\tl_count:N \l_gv_item_list_temp_tl} = {1} {
+			\tl_put_left:Nn \l_gv_item_list_temp_tl { \gvtm{\lparen} }
+			\tl_put_right:Nn \l_gv_item_list_temp_tl { \gvtm{\rparen} }
+		}
+	\tl_use:N \l_gv_item_list_temp_tl
+	\tl_set:Nn \l_gv_item_list_temp_tl { }
+}
+\ExplSyntaxOff
+\ExplSyntaxOn
+\newcommand{\gvAltItemListUse}[0]{
+	\tl_use:N \l_gv_item_list_temp_tl
+	\tl_set:Nn \l_gv_item_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+%% Configurations
+\NewDocumentCommand{\gvCNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\gvtm(\gvCNew#1\gvtm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\gvtm{\lparen}#2\gvtm{\rparen}}
+		}}{%
+		\gvtm{\text{ν}}}}
+\def\gvCMain{\mathop{\gvtm{\labMain}}}
+\def\gvCChild{\mathop{\gvtm{\labChild}}}
+\newcommand{\gvCPar}[1][]{\mathrel{\gvtm{\parallel_{#1}}}}
+\newcommand{\gvCLink}[3][]{#2{\gvtm{\altxleftrightarrow{#1}}}#3}
+
+\def\gvSUnit{\llSUnit}
+\NewDocumentCommand{\gvSeq}{o}{%
+	\gvmark[\mathrel]{\vdash\IfValueT{#1}{^{#1}}}}
+\def\gvQualSeq{\mathrlap{\vdash}\vdash}
+\NewDocumentCommand{\gvSubst}{m m}{%
+	\mathord{\gvtm\{#1\gvtm/#2\gvtm\}}}
+\NewDocumentCommand{\gvSSubst}{m m m m}{%
+	\mathord{\gvtm\{#1\gvtm/#2\gvtm,#3\gvtm/#4\gvtm\}}}
+
+\NewDocumentCommand{\gvEquiv}{t/}{%
+	\IfBooleanTF{#1}{\gvmark[\mathrel]{\not\equiv}}{\gvmark[\mathrel]{\equiv}}}
+\NewDocumentCommand{\gvEvalM}{s t+ t/}{%
+	\IfBooleanTF{#3}{%
+		\gvmark[\mathrel]{\not\longrightarrow_M}
+	}{%
+		\gvmark[\mathrel]{\longrightarrow_M}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\gvEval}{s t+ t/}{%
+	\IfBooleanTF{#3}{%
+		\gvmark[\mathrel]{\not\longrightarrow}
+	}{%
+		\gvmark[\mathrel]{\longrightarrow}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Good Variation with Cut
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\gvcutabbrev{\mathchoice%
+	{\text{GVC}}%
+	{\text{GVC}}%
+	{\scriptstyle G\!V\!C}%
+	{\scriptscriptstyle G\!V\!C}}
+\def\gvcutSeq{\mathrel{\vdash_{\gvcutabbrev}}}
+\def\gvcutEquiv{\mathrel{\equiv_{\gvcutabbrev}}}
+\def\gvcutEval{\mathrel{\longrightarrow_{\gvcutabbrev}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hypersequent Good Variation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\hvabbrev{\mathchoice%
+	{\text{H}}%
+	{\text{H}}%
+	{\scriptstyle H}%
+	{\scriptscriptstyle H}}
+\def\hvSeq{\mathrel{\vdash_{\hvabbrev}}}
+
+\def\HGV{HGV}
+\def\fgHGV{\text{HGV}\ensuremath{*}\xspace}
+
+\def\hvSUnit{\llSUnit}
+\def\hvHUnit{\llHUnit}
+\def\hvFlat{\mathop{\downarrow}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Lindley and Morris' Good Variation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Highlighting
+
+\def\lmabbrev{\mathchoice%
+	{\text{LM}}%
+	{\text{LM}}%
+	{\scriptstyle L\!M}%
+	{\scriptscriptstyle L\!M}}
+\def\mathtylm[#1]#2{\mathtmlmstyle[#1]{\mathtylmcolor[#2]}}%
+\def\mathtmlm[#1]#2{\mathtmlmstyle[#1]{\mathtmlmcolor[#2]}}%
+
+\NewDocumentCommand{\lmsetstyle}{m}{%
+\def\lmstyle{#1}%
+\ifstrequal{#1}{1}{%
+\def\mathtylmstyle[##1]##2{\mathtyprimarystyle[##1]{##2}}%
+\def\mathtmlmstyle[##1]##2{\mathtmprimarystyle[##1]{##2}}%
+\def\lmmark[##1]##2{##1{##2}}%
+}{\ifstrequal{#1}{2}{%
+\def\mathtylmstyle[##1]##2{\mathtysecondarystyle[##1]{##2}}%
+\def\mathtmlmstyle[##1]##2{\mathtmsecondarystyle[##1]{##2}}%
+\def\lmmark[##1]##2{##1{##2_{\lmabbrev}}}%
+}{%
+\def\mathtylmstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'LM' is disabled}{}}%
+\def\mathtmlmstyle[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'LM' is disabled}{}}%
+\def\lmmark[##1]##2{%
+	\PackageError{syntax-highlighting}{Language 'LM' is disabled}{}}%
+}}}
+\NewDocumentCommand{\lmsetcolor}{m}{%
+	\def\lmColor{#1}%
+	\ifstrequal{#1}{1}{%
+		\def\mathtylmcolor[##1]{\mathtyprimarycolor[##1]}%
+		\def\mathtmlmcolor[##1]{\mathtmprimarycolor[##1]}%
+	}{\ifstrequal{#1}{2}{%
+			\def\mathtylmcolor[##1]{\mathtysecondarycolor[##1]}%
+			\def\mathtmlmcolor[##1]{\mathtmsecondarycolor[##1]}%
+		}{%
+			\def\mathtylmcolor[##1]{##1}%
+			\def\mathtmlmcolor[##1]{##1}%
+		}}}
+\NewDocumentCommand{\lmset}{m}{\lmsetstyle{#1}\lmsetcolor{#1}}
+\NewDocumentCommand{\lmexp}{s m m}{%
+	\def\oldlmstyle{\lmstyle}%
+	\def\oldlmcolor{\lmColor}%
+	\IfBooleanTF{#1}{%
+		\lmsetcolor{#2}}{%
+		\lmsetstyle{#2}\lmsetcolor{#2}}%
+	#3%
+	\IfBooleanTF{#1}{%
+		\lmsetcolor{\oldlmcolor}}{%
+		\lmsetstyle{\oldlmstyle}\lmsetcolor{\oldlmcolor}}}
+
+%%% Types: RoyalBlue, sans-serif
+\newcommand{\lmty}[1]{\mathtylm[\mathord]{#1}}
+
+%%% Terms: RedOrange, bold, with-serif
+\newcommand{\lmtm}[1]{
+	\ifstrequal{#1}{.}
+	{\mathtmlm[\mathpunct]{.}}
+	{\ifstrequal{#1}{,}
+		{\mathtmlm[\mathpunct]{,}}
+		{\ifstrequal{#1}{:}
+			{\mathtmlm[\mathord]{:}}
+			{\ifstrequal{#1}{;}
+				{\mathtmlm[\mathpunct]{;}}
+				{\ifstrequal{#1}{\lparen}
+					{\mathtmlm[\mathopen]{\lparen}}
+					{\ifstrequal{#1}{\rparen}
+						{\mathtmlm[\mathclose]{\rparen}}
+						{\ifstrequal{#1}{\lbrace}
+							{\mathtmlm[\mathopen]{\lbrace}}
+							{\ifstrequal{#1}{\rbrace}
+								{\mathtmlm[\mathclose]{\rbrace}}
+								{\ifstrequal{#1}{\lbrack}
+									{\mathtmlm[\mathopen]{\lbrack}}
+									{\ifstrequal{#1}{\rbrack}
+										{\mathtmlm[\mathclose]{\rbrack}}
+										{\ifstrequal{#1}{\langle}
+											{\mathtmlm[\mathopen]{\langle}}
+											{\ifstrequal{#1}{\rangle}
+												{\mathtmlm[\mathclose]{\rangle}}
+												{\ifstrequal{#1}{\cdots}
+													{\mathtmlm[\mathinner]{\cdots}}
+													{\mathtmlm[\mathord]{#1}}
+												}}}}}}}}}}}}}
+
+
+%% Metavariables
+
+%%% Thread Flags
+\newcommandPIE\lmphi[0]{\lmtm{ϕ#1#2#3}}
+\newcommandPIE\lmpsi[0]{\lmtm{ψ#1#2#3}}
+
+%%% Types
+\newcommandPIE\lmR[0]{\lmty{R#1#2#3}}
+\newcommandPIE\lmS[0]{\lmty{S#1#2#3}}
+\newcommandPIE\lmT[0]{\lmty{T#1#2#3}}
+\newcommandPIE\lmU[0]{\lmty{U#1#2#3}}
+\newcommandPIE\lmG[0]{\lmty{G#1#2#3}}
+
+%%% Terms
+\NewDocumentCommand{\lma}{t' e{^} e{_}}{%
+	\lmtm{%
+		\IfBooleanTF{#1}{\bar{a}}{a}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lmb}{t' e{^} e{_}}{%
+	\lmtm{%
+		\IfBooleanTF{#1}{\bar{b}}{b}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lmc}{t' e{^} e{_}}{%
+	\lmtm{%
+		\IfBooleanTF{#1}{\bar{c}}{c}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lmx}{t' e{^} e{_}}{%
+	\lmtm{%
+		\IfBooleanTF{#1}{\bar{x}}{x}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lmy}{t' e{^} e{_}}{%
+	\lmtm{%
+		\IfBooleanTF{#1}{\bar{y}}{y}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lmz}{t' e{^} e{_}}{%
+	\lmtm{%
+		\IfBooleanTF{#1}{\bar{z}}{z}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\NewDocumentCommand{\lmw}{t' e{^} e{_}}{%
+	\lmtm{%
+		\IfBooleanTF{#1}{\bar{w}}{w}%
+		\IfValueT{#2}{^{#2}}%
+		\IfValueT{#3}{_{#3}}%
+	}}
+\newcommandPIE\lmf[0]{\lmtm{f#1#2#3}}
+\newcommandPIE\lmg[0]{\lmtm{g#1#2#3}}
+\newcommandPIE\lmh[0]{\lmtm{h#1#2#3}}
+\newcommandPIE\lmK[0]{\lmtm{K#1#2#3}}
+\newcommandPIE\lmL[0]{\lmtm{L#1#2#3}}
+\newcommandPIE\lmM[0]{\lmtm{M#1#2#3}}
+\newcommandPIE\lmN[0]{\lmtm{N#1#2#3}}
+\newcommandPIE\lmV[0]{\lmtm{V#1#2#3}}
+\newcommandPIE\lmW[0]{\lmtm{W#1#2#3}}
+\NewDocumentCommand{\lmEE}{t' e{^} e{_} d[]}{%
+	\lmtm{\mathcal{E}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\lmtm\lbrack}#4\mathclose{\lmtm\rbrack}}}
+\NewDocumentCommand{\lmEF}{t' e{^} e{_} d[]}{%
+	\lmtm{\mathcal{F}%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\lmtm\lbrack}#4\mathclose{\lmtm\rbrack}}}
+\NewDocumentCommand{\lmE}{t' e{^} e{_} d[]}{%
+	\lmtm{E%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\lmtm\lbrack}#4\mathclose{\lmtm\rbrack}}}
+\NewDocumentCommand{\lmF}{t' e{^} e{_} d[]}{%
+	\lmtm{F%
+		\IfValueTF{#2}{^{\IfBooleanT{#1}{\prime}#2}}{\IfBooleanT{#1}{'}}%
+		\IfValueT{#3}{_{#3}}}
+	\IfValueT{#4}{\mathopen{\lmtm\lbrack}#4\mathclose{\lmtm\rbrack}}}
+
+%%% Configurations
+\newcommandPIE\lmC[0]{\lmtm{C#1#2#3}}
+\newcommandPIE\lmD[0]{\lmtm{D#1#2#3}}
+\newcommandPIE\lmCC[0]{\lmtm{\mathcal{C}#1#2#3}}
+\newcommandPIE\lmCD[0]{\lmtm{\mathcal{D}#1#2#3}}
+
+%% Contexts
+\newcommandPIE\lmHole[0]{\lmtm{\Box#1#2#3}}
+
+%% Threads & Thread Flags
+\newcommandPIE\lmTT[0]{\lmtm{\mathcal{T}#1#2#3}}
+\newcommandPIE\lmTA[0]{\lmtm{\mathcal{A}#1#2#3}}
+\def\labMain{\vcenter{\hbox{\scaleobj{0.6}{●}}}}
+\def\labChild{\vcenter{\hbox{\scaleobj{0.6}{○}}}}
+\newcommand{\lmMain}[0]{\mathop{\lmtm{\labMain}}}
+\newcommand{\lmChild}[0]{\mathop{\lmtm{\labChild}}}
+\def\lmCJoin{\sqcap}
+
+%% Types
+\def\lmtyUnit{\lmty{\mathbf{1}}}
+\def\lmtyVoid{\lmty{\mathbf{0}}}
+\def\lmtyPair{\mathbin{\lmty{\times}}}
+\def\lmtySum{\mathbin{\lmty{+}}}
+\def\lmtyFun{\mathbin{\lmty{\multimap}}}
+
+%%% Environments
+\newcommandPIE\lmGG[0]{\lmty{Γ#1#2#3}}
+\newcommandPIE\lmGD[0]{\lmty{Δ#1#2#3}}
+\newcommandPIE\lmGT[0]{\lmty{Θ#1#2#3}}
+
+%% Session Types
+\newcommandPIE\lmtySend[1]{\lmty{!}#2#3#4#1\lmty{.}}
+\newcommandPIE\lmtyRecv[1]{\lmty{?}#2#3#4#1\lmty{.}}
+\NewDocumentCommand{\lmtyEnd}{t! t? o}{%
+	\lmty{\text{end}}
+	\IfValueT{#3}{^{#3}}
+	\IfBooleanTF{#1}{_{\lmty{!}}}{\IfBooleanT{#2}{_{\lmty{?}}}}
+}
+\newcommandPIE\lmtyPlus[0]{\mathbin{\lmty{\llPlus}}}
+\newcommandPIE\lmtyWith[0]{\mathbin{\lmty{\llWith}}}
+\newcommandPIE\lmtyTop[0]{\lmty{\llWith}\lmty\lbrace\lmty\rbrace}
+\newcommandPIE\lmtyNil[0]{\lmty{\llPlus}\lmty\lbrace\lmty\rbrace}
+
+%% Runtime Types
+\newcommand{\lmtyLock}[1]{#1^{\lmty{\#}}}
+\newcommand{\lmLock}[2]{\lmtm{\langle}#1\lmtm{,}#2\lmtm{\rangle}}
+\def\lmtyMain{\mathop{\lmty{\labMain}}}
+\def\lmtyChild{\mathop{\lmty{\labChild}}}
+
+%% Terms
+\NewDocumentCommand{\lmLam}{d() t.}{%
+	\mathord{\lmtm{λ}}%
+	\IfValueT{#1}{#1}%
+	\IfBooleanT{#2}{\lmtm{.}}%
+}
+% \def\lmLam{\lmtm{λ}}
+\NewDocumentCommand{\lmApp}{d()}{%
+	\;%
+	\IfValueT{#1}{%
+		\lmtm\lparen%
+		#1%
+		\lmtm\rparen%
+	}%
+}
+\def\lmAndThen{\mathpunct{\lmtm{;}}}
+\NewDocumentCommand{\lmLet}{>{\SplitList{,}} d() t=}{%
+	\mathord{\lmtm{\text{let}}}%
+	\IfValueT{#1}{%
+		\:%
+		\def\lmItemSep{\mathpunct{\lmtm{,}}}%
+		\ProcessList{#1}{\lmItemListAdd}\lmLetItemListUse%
+		\IfBooleanT{#2}{\mathrel{\lmtm{=}}}%
+	}%
+}
+\NewDocumentCommand{\lmPair}{>{\SplitList{,}} d()}{%
+	\IfValueT{#1}{%
+		\def\lmItemSep{\mathpunct{\lmtm{,}}}%
+		\ProcessList{#1}{\lmItemListAdd}\lmLetItemListUse%
+	}%
+}
+\NewDocumentCommand{\lmCase}{m >{\SplitList{;}} d()}{%
+	\mathord{\lmtm{\text{case}}}%
+	\:%
+	#1%
+	\IfValueT{#2}{%
+		\:%
+		\lmtm{\lbrace}%
+		\def\lmItemSep{\mathpunct{\lmtm{;}}}%
+		\ProcessList{#2}{\lmItemListAdd}\lmAltItemListUse%
+		\lmtm{\rbrace}%
+	}%
+}
+\def\lmBe{\mathrel{\lmtm{=}}}
+\def\lmIn{\mathrel{\lmtm{\text{in}}}}
+\def\lmUnit{\lmtm(\lmtm)}
+\NewDocumentCommand{\lmInl}{m t:}{%
+	\mathop{\lmtm{\text{inl}}}%
+	#1%
+	\IfBooleanT{#2}{\mathbin{\lmtm{:}}}
+}
+\NewDocumentCommand{\lmInr}{m t:}{%
+	\mathop{\lmtm{\text{inr}}}%
+	#1%
+	\IfBooleanT{#2}{\mathbin{\lmtm{:}}}
+}
+\def\lmOf{\:}
+\def\lmAbsurd{\lmtm{\text{absurd}}}
+\def\lmLink{\lmtm{\text{link}}}
+\def\lmNew{\lmtm{\text{new}}}
+\def\lmSpawn{\lmtm{\text{spawn}}}
+\def\lmFork{\lmtm{\text{fork}}}
+\def\lmSend{\lmtm{\text{send}}}
+\def\lmRecv{\lmtm{\text{recv}}}
+\def\lmClose{\lmtm{\text{close}}}
+\def\lmWait{\lmtm{\text{wait}}}
+\def\lmSelect{\lmtm{\text{select}}}
+\def\lmSelectInl{\lmSelect\lmApp{\lmInl{}}}
+\def\lmSelectInr{\lmSelect\lmApp{\lmInr{}}}
+\def\lmLbl{\lmtm{\ell}}
+
+\NewDocumentCommand{\lmOffer}{m >{\SplitList{;}} d()}{%
+	\mathord{\lmtm{\text{offer}}}%
+	\:%
+	#1%
+	\IfValueT{#2}{%
+		\:%
+		\lmtm{\lbrace}%
+		\def\lmItemSep{\mathpunct{\lmtm{;}}}%
+		\ProcessList{#2}{\lmItemListAdd}\lmAltItemListUse%
+		\lmtm{\rbrace}%
+	}%
+}
+
+%% Comma-separated items
+\ExplSyntaxOn
+\tl_new:N \l_lm_item_list_temp_tl%
+\newcommand{\lmItemListAdd}[1]{
+	\tl_if_blank:nF { #1 } {
+		\tl_if_empty:NTF \l_lm_item_list_temp_tl {
+			\tl_put_right:Nn \l_lm_item_list_temp_tl { #1 }
+		} {
+			\tl_put_right:Nn \l_lm_item_list_temp_tl { \lmItemSep~#1 }
+		}
+	}
+}
+\ExplSyntaxOff
+\ExplSyntaxOn
+\newcommand{\lmLetItemListUse}[0]{
+	\int_compare:nNnF {\tl_count:N \l_lm_item_list_temp_tl} = {1} {
+			\tl_put_left:Nn \l_lm_item_list_temp_tl { \lmtm{\lparen} }
+			\tl_put_right:Nn \l_lm_item_list_temp_tl { \lmtm{\rparen} }
+		}
+	\tl_use:N \l_lm_item_list_temp_tl
+	\tl_set:Nn \l_lm_item_list_temp_tl { }
+}
+\ExplSyntaxOff
+\ExplSyntaxOn
+\newcommand{\lmAltItemListUse}[0]{
+	\tl_use:N \l_lm_item_list_temp_tl
+	\tl_set:Nn \l_lm_item_list_temp_tl { }
+}
+\ExplSyntaxOff
+
+%% Configurations
+\NewDocumentCommand{\lmCNew}{d() d()}{%
+	\IfValueTF{#1}{%
+		\lmtm(\lmCNew#1\lmtm)
+		\IfValueT{#2}{%
+			\IfSingleTF{#2}{#2}{\lmtm{\lparen}#2\lmtm{\rparen}}
+		}}{%
+		\lmtm{\text{ν}}}}
+\def\lmCMain{\mathop{\lmtm{\labMain}}}
+\def\lmCChild{\mathop{\lmtm{\labChild}}}
+\newcommand{\lmCPar}[1][]{\mathrel{\lmtm{\parallel_{#1}}}}
+\newcommand{\lmCLink}[3][]{#2{\lmtm{\altxleftrightarrow{#1}}}#3}
+\newcommand{\lmCParSplit}[2]{\mathrel{{}_{#1}{\lmCPar}{}_{#2}}}
+
+\def\lmSUnit{\llSUnit}
+\def\lmSeq{\lmmark[\mathrel]{\vdash}}
+\NewDocumentCommand{\lmSubst}{m m}{%
+	\mathord{\lmtm\{#1\lmtm/#2\lmtm\}}}
+\NewDocumentCommand{\lmSSubst}{m m m m}{%
+	\mathord{\lmtm\{#1\lmtm/#2\lmtm,#3\lmtm/#4\lmtm\}}}
+
+\NewDocumentCommand{\lmEquiv}{t/}{%
+	\IfBooleanTF{#1}{\lmmark[\mathrel]{\not\equiv}}{\lmmark[\mathrel]{\equiv}}}
+\NewDocumentCommand{\lmEvalM}{s t+ t/}{%
+	\IfBooleanTF{#3}{%
+		\lmmark[\mathrel]{\not\longrightarrow}
+	}{%
+		\lmmark[\mathrel]{\longrightarrow}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}
+\NewDocumentCommand{\lmEval}{s t+ t/}{%
+	\IfBooleanTF{#3}{%
+		\lmmark[\mathrel]{\not\Longrightarrow}
+	}{%
+		\lmmark[\mathrel]{\Longrightarrow}}%
+	\IfBooleanTF{#1}{^{\star}}{\IfBooleanT{#2}{^{+}}}}

@@ -1,0 +1,77 @@
+\begin{mathpar}
+  \headerrule{Action Rules}
+  \\
+  \begin{array}{l@{\;}c@{\;}lll}
+    \hpZapper\hpy[\hpNK,\hpx][\hpNN]
+     & \hpTo{\hpKill\hpx}
+     & \hpZapper\hpy[\hpNK][\hpNN,\hpx]
+     &
+     & \RuleLabel{H}{Zap-Kill}
+    \\
+    \hpLink\hpx\hpy
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpy]
+     &
+     & \RuleLabel{H}[Die-Link\textsubscript{1}]{Die-Link1}
+    \\
+    \hpLink\hpx\hpy
+     & \hpTo{\hpDie\hpy}
+     & \hpZapper\hpy[\hpx]
+     &
+     & \RuleLabel{H}[Die-Link\textsubscript{2}]{Die-Link2}
+    \\
+    \hpSend\hpx\hpy.\hpP
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpNK]
+     & \text{where }\hpNK\defeq\fn(\hpP)\setminus\{\hpx\}
+     & \RuleLabel{H}{Die-Send}
+    \\
+    \hpRecv\hpx\hpy.\hpP
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpNK]
+     & \text{where }\hpNK\defeq\fn(\hpP)\setminus\{\hpx\}
+     & \RuleLabel{H}{Die-Recv}
+    \\
+    \hpClose\hpx.\hpP
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpNK]
+     & \text{where }\hpNK\defeq\fn(\hpP)
+     & \RuleLabel{H}{Die-Close}
+    \\
+    \hpWait\hpx.\hpP
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpNK]
+     & \text{where }\hpNK\defeq\fn(\hpP)
+     & \RuleLabel{H}{Die-Wait}
+    \\
+    \hpSelect\hpx<1.\hpP
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpNK]
+     & \text{where }\hpNK\defeq\fn(\hpP)\setminus\{\hpx\}
+     & \RuleLabel{H}[Die-Select\textsubscript{1}]{Die-Select1}
+    \\
+    \hpSelect\hpx<2.\hpP
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpNK]
+     & \text{where }\hpNK\defeq\fn(\hpP)\setminus\{\hpx\}
+     & \RuleLabel{H}[Die-Select\textsubscript{2}]{Die-Select2}
+    \\
+    \hpOffer\hpx(\hpInl:\hpP;\hpInr:\hpQ)
+     & \hpTo{\hpDie\hpx}
+     & \hpZapper\hpx[\hpNK]
+     & \text{where }\hpNK\defeq\fn(\hpP)\setminus\{\hpx\}
+     & \RuleLabel{H}{Die-Offer}
+    \\
+    \hpZapper\hpy[\hpNK][\hpNN,\hpx]
+     & \hpTo{\hpKilled\hpx}
+     & \hpZapper\hpy[\hpNK][\hpNN]
+     &
+     & \RuleLabel{H}{Zap-Killed}
+    \\
+    \hpZapper\hpx
+     & \hpTo{\hpDied\hpx}
+     & \hpZ
+     &
+     & \RuleLabel{H}{Zap-Died}
+  \end{array}
+\end{mathpar}

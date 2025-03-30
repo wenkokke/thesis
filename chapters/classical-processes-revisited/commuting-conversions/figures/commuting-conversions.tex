@@ -1,0 +1,69 @@
+\begin{mathpar}
+  \begin{array}{lcll}
+    \cpNew(\cpz\cpz')(\cpSend\cpx\cpy.(\cpP\cpPar\cpQ)\cpPar\cpR)
+     & \cpEvalCC
+     & \cpSend\cpx\cpy.(\cpP\cpPar\cpNew(\cpz\cpz')(\cpQ\cpPar\cpR))
+    \hfill\quad\text{if }\cpz\notin\cpP
+     & \RuleLabel{C}[CC-Send\textsubscript{1}]{CC-Send1}
+    \\
+    \cpNew(\cpz\cpz')(\cpSend\cpx\cpy.(\cpP\cpPar\cpQ)\cpPar\cpR)
+     & \cpEvalCC
+     & \cpSend\cpx\cpy.(\cpNew(\cpz\cpz')(\cpP\cpPar\cpR)\cpPar\cpQ)
+    \hfill\quad\text{if }\cpz\notin\cpQ
+     & \RuleLabel{C}[CC-Send\textsubscript{2}]{CC-Send2}
+    \\
+    \cpNew(\cpz\cpz')(\cpRecv\cpx\cpy.\cpP\cpPar\cpQ)
+     & \cpEvalCC
+     & \cpRecv\cpx\cpy.\cpNew(\cpz\cpz')(\cpP\cpPar\cpQ)
+     & \RuleLabel{C}{CC-Recv}
+    \\
+    \cpNew(\cpz\cpz')(\cpWait\cpx.\cpP\cpPar\cpQ)
+     & \cpEvalCC
+     & \cpWait\cpx.\cpNew(\cpz\cpz')(\cpP\cpPar\cpQ)
+     & \RuleLabel{C}{CC-Wait}
+    \\
+    \cpNew(\cpz\cpz')(\cpSelect\cpx<1.\cpP\cpPar\cpQ)
+     & \cpEvalCC
+     & \cpSelect\cpx<1.\cpNew(\cpz\cpz')(\cpP\cpPar\cpQ)
+     & \RuleLabel{C}[CC-Select\textsubscript{1}]{CC-Select1}
+    \\
+    \cpNew(\cpz\cpz')(\cpSelect\cpx<2.\cpP\cpPar\cpQ)
+     & \cpEvalCC
+     & \cpSelect\cpx<2.\cpNew(\cpz\cpz')(\cpP\cpPar\cpQ)
+     & \RuleLabel{C}[CC-Select\textsubscript{2}]{CC-Select2}
+    \\
+    \multicolumn{2}{l}{
+      \cpNew(\cpz\cpz')(\cpOffer\cpx(\cpInl: \cpP; \cpInr: \cpQ)\cpPar\cpR)}
+    \\
+     & \cpEvalCC
+    \\
+    \multicolumn{3}{r}{
+      \cpOffer\cpx(
+      \cpInl: \cpNew(\cpz\cpz')(\cpP\cpPar\cpR);
+      \cpInr: \cpNew(\cpz\cpz')(\cpQ\cpPar\cpR))}
+     & \RuleLabel{C}{CC-Offer}
+  \end{array}
+
+  \begin{RuleWithLabel}{C}{CC-Absurd}
+    \AXC{$\cpz\in\cpNN,\cpz'\in\fn(\cpP)$}
+    \AXC{$\cpNN'=(\cpNN\setminus\{\cpz\})\cup(\fn(\cpP)\setminus\{\cpz'\})$}
+    \BIC{$\cpNew(\cpz\cpz')(\cpAbsurdZap\cpx\cpNN\cpPar\cpP)
+        \cpEvalCC
+        \cpAbsurdZap\cpx\cpNN'$}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{C}{CC-SC}
+    \AXC{$\cpP  \cpEquiv \cpP'$}
+    \AXC{$\cpP' \cpEvalCC  \cpQ'$}
+    \AXC{$\cpQ' \cpEquiv \cpQ $}
+    \TIC{$\cpP  \cpEvalCC  \cpQ $}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{C}{CC-Cong}
+    \AXC{$\cpP \cpEvalCC \cpP'$}
+    \UIC{$\cpEE[\cpP] \cpEvalCC \cpEE[\cpP']$}
+    \DP
+  \end{RuleWithLabel}
+\end{mathpar}

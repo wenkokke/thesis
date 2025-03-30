@@ -1,0 +1,201 @@
+\begin{mathpar}
+  \headerrule{Action Rules}
+  \\
+  \begin{array}{
+    l@{\;}c@{\;}l!{\hspace{2pt}}l
+    @{\hspace{1cm}}
+    l@{\;}c@{\;}l!{\hspace{2pt}}l
+    }
+    \hpLink\hpx\hpy
+     &
+    \hpTo{\hpLink\hpx\hpy}
+     &
+    \hpZ
+     &
+    \RuleLabel{H}[Act-Link\textsubscript{1}]{Act-Link1}
+     &
+    \hpLink\hpx\hpy
+     &
+    \hpTo{\hpLink\hpy\hpx}
+     &
+    \hpZ
+     &
+    \RuleLabel{H}[Act-Link\textsubscript{2}]{Act-Link2}
+    \\
+    \hpSend\hpx\hpy.\hpP
+     &
+    \hpTo{\hpSend\hpx\hpy}
+     &
+    \hpP
+     &
+    \RuleLabel{H}{Act-send}
+     &
+    \hpSelect\hpx<1.\hpP
+     &
+    \hpTo{\hpSelect\hpx<1}
+     &
+    \hpP
+     &
+    \RuleLabel{H}[Act-Select\textsubscript{1}]{Act-Select1}
+    \\
+    \hpRecv\hpx\hpy.\hpP
+     &
+    \hpTo{\hpRecv\hpx\hpy}
+     &
+    \hpP
+     &
+    \RuleLabel{H}{Act-Recv}
+     &
+    \hpSelect\hpx<2.\hpP
+     &
+    \hpTo{\hpSelect\hpx<2}
+     &
+    \hpP
+     &
+    \RuleLabel{H}[Act-Select\textsubscript{2}]{Act-Select2}
+    \\
+    \hpClose\hpx.\hpP
+     &
+    \hpTo{\hpClose\hpx}
+     &
+    \hpP
+     &
+    \RuleLabel{H}{Act-Close}
+     &
+    \hpOffer\hpx(\hpInl: \hpP; \hpInr: \hpQ)
+     &
+    \hpTo{\hpOffer\hpx>1}
+     &
+    \hpP
+     &
+    \RuleLabel{H}[Act-Offer\textsubscript{1}]{Act-Offer1}
+    \\
+    \hpWait\hpx.\hpP
+     &
+    \hpTo{\hpWait\hpx}
+     &
+    \hpP
+     &
+    \RuleLabel{H}{Act-Wait}
+     &
+    \hpOffer\hpx(\hpInl: \hpP; \hpInr: \hpQ)
+     &
+    \hpTo{\hpOffer\hpx>2}
+     &
+    \hpQ
+     &
+    \RuleLabel{H}[Act-Offer\textsubscript{2}]{Act-Offer2}
+  \end{array}
+  \\
+  \headerrule{Structural Rules}
+  \\
+  \begin{RuleWithLabel}{H}{Str-Par}
+    \AXC{$\hpP \hpTo{\hpAct} \hpP'$}
+    \AXC{$\hpQ \hpTo{\hpAct'} \hpQ'$}
+    \AXC{$\bn(\hpAct)\cap\bn(\hpAct')=\emptyset$}
+    \TIC{$\hpP\hpPar\hpQ \hpTo{\hpAct\hpLabPar\hpAct'} \hpP'\hpPar\hpQ'$}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{H}{Str-Cong}
+    \AXC{$\hpP \hpTo{\hpAct} \hpP'$}
+    \AXC{$(\bn(\hpEE)\cup\fn(\hpEE))\cap(\bn(\hpAct)\cup\fn(\hpAct))=\emptyset$}
+    % \AXC{$\bn(\hpEE)\cap\bn(\hpAct)=\emptyset$}
+    % \AXC{$\bn(\hpEE)\cap\fn(\hpAct)=\emptyset$}
+    % \AXC{$\fn(\hpEE)\cap\bn(\hpAct)=\emptyset$}
+    \BIC{$\hpEE[\hpP] \hpTo{\hpAct} \hpEE[\hpP']$}
+    \DP
+  \end{RuleWithLabel}
+  % \begin{RuleWithLabel}{H}{Str-ParCong1}[Str-ParCong\textsubscript{1}]
+  %   \AXC{$\hpP \hpTo{\hpLab} \hpP'$}
+  %   \AXC{$\bn(\hpLab)\cap\fn(\hpQ)=\emptyset$}
+  %   \BIC{$\hpP\hpPar\hpQ \hpTo{\hpLab} \hpP'\hpPar\hpQ$}
+  %   \DP
+  % \end{RuleWithLabel}
+  %
+  % \begin{RuleWithLabel}{H}{Str-ParCong2}[Str-ParCong\textsubscript{2}]
+  %   \AXC{$\hpQ \hpTo{\hpLab} \hpQ'$}
+  %   \AXC{$\bn(\hpLab)\cap\fn(\hpP)=\emptyset$}
+  %   \BIC{$\hpP\hpPar\hpQ \hpTo{\hpLab} \hpP'\hpPar\hpQ$}
+  %   \DP
+  % \end{RuleWithLabel}
+  %
+  % \begin{RuleWithLabel}{H}{Str-NewCong}
+  %   \AXC{$\hpP \hpTo{\hpLab} \hpP'$}
+  %   \AXC{$\hpx,\hpx'\notin\fn(\hpLab)\cup\bn(\hpLab)$}
+  %   \BIC{$\hpNew(\hpx\hpx')\hpP \hpTo{\hpLab} \hpP'$}
+  %   \DP
+  % \end{RuleWithLabel}
+  \\
+  \headerrule{Communication Rules}
+  \\
+  \begin{RuleWithLabel}{H}{Tau-Link}
+    \AXC{$
+        \hpP
+        \hpTo{\hpLink\hpx\hpy}
+        \hpP'
+      $}
+    \UIC{$
+        \hpNew(\hpx\hpx')\hpP
+        \hpTTo
+        \hpP'\hpSubst{\hpy}{\hpx'}
+      $}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{H}{Tau-Send-Recv}
+    \AXC{$
+        \hpP
+        \hpTo{\hpSend\hpx\hpy\hpLabPar\hpRecv{\hpx'}{\hpy'}}
+        \hpP'
+      $}
+    \UIC{$
+        \hpNew(\hpx\hpx')\hpP
+        \hpTTo
+        \hpNew(\hpx\hpx')\hpNew(\hpy\hpy')\hpP'
+      $}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{H}{Tau-Close-Wait}
+    \AXC{$
+        \hpP
+        \hpTo{\hpClose\hpx\hpLabPar\hpWait{\hpx'}}
+        \hpP'
+      $}
+    \UIC{$
+        \hpNew(\hpx\hpx')\hpP
+        \hpTTo
+        \hpP'
+      $}
+    \DP
+  \end{RuleWithLabel}
+  \\
+  \begin{RuleWithLabel}{H}{Tau-Select-Offer1}[Tau-Select-Offer\textsubscript{1}]
+    \AXC{$
+        \hpP
+        \hpTo{\hpSelect\hpx<1\hpLabPar\hpOffer{\hpx'}>1}
+        \hpP'
+      $}
+    \UIC{$
+        \hpNew(\hpx\hpx')\hpP
+        \hpTTo
+        \hpNew(\hpx\hpx')\hpP'
+      $}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{H}{Tau-Select-Offer2}[Tau-Select-Offer\textsubscript{2}]
+    \AXC{$
+        \hpP
+        \hpTo{\hpSelect\hpx<2\hpLabPar\hpOffer{\hpx'}>2}
+        \hpP'
+      $}
+    \UIC{$
+        \hpNew(\hpx\hpx')\hpP
+        \hpTTo
+        \hpNew(\hpx\hpx')\hpP'
+      $}
+    \DP
+  \end{RuleWithLabel}
+\end{mathpar}

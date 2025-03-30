@@ -1,0 +1,2 @@
+Proof.
+  ~ By induction on the derivation of the reduction $\hpP\hpEval\hpQ$. In the cases for \Rule{H-E-Link}, \Rule{H-E-Send}, \Rule{H-E-Close}, \Rule{H-E-Select1}, or \Rule{H-E-Select2}, the result follows immediately. In the case for \Rule{H-E-Cong}, the result follows by composing the two evaluation contexts. In the case for \Rule{H-E-Equiv}, the result follows by composing the structural congruences using transitivity.
