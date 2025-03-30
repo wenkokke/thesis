@@ -1,0 +1,63 @@
+\begin{mathpar}
+  \begin{array}{l@{\;}c@{\;}ll}
+    \hpNew(\hpx\hpx')(\hpLink\hpx\hpw\hpPar\hpP)
+     & \hpEval
+     &
+    \hpP\hpSubst{\hpw}{\hpx'}
+     & \RuleLabel{H}{E-Link}
+    \\
+    \hpNew(\hpx\hpx')(
+    \hpSend\hpx\hpy.\hpP
+    \hpPar
+    \hpRecv{\hpx'}{\hpy'}.\hpQ
+    )
+     & \hpEval
+     &
+    \hpNew(\hpx\hpx')\hpNew(\hpy\hpy')(\hpP\hpPar\hpQ)
+     & \RuleLabel{H}{E-Send}
+    \\
+    \hpNew(\hpx\hpx')(
+    \hpClose\hpx.0
+    \hpPar
+    \hpWait{\hpx'}.\hpQ
+    )
+     & \hpEval
+     &
+    \hpQ
+     & \RuleLabel{H}{E-Close}
+    \\
+    \hpNew(\hpx\hpx')(
+    \hpSelect\hpx<1.\hpP
+    \hpPar
+    \hpOffer{\hpx'}(\hpInl: \hpQ; \hpInr: \hpR)
+    )
+     & \hpEval
+     &
+    \hpNew(\hpx\hpx')(\hpP\hpPar\hpQ)
+     & \RuleLabel{H}[E-Select\textsubscript{1}]{E-Select1}
+    \\
+    \hpNew(\hpx\hpx')(
+    \hpSelect\hpx<2.\hpP
+    \hpPar
+    \hpOffer{\hpx'}(\hpInl: \hpQ; \hpInr: \hpR)
+    )
+     & \hpEval
+     &
+    \hpNew(\hpx\hpx')(\hpP\hpPar\hpR)
+     & \RuleLabel{H}[E-Select\textsubscript{2}]{E-Select2}
+  \end{array}
+
+  \begin{RuleWithLabel}{H}{E-Equiv}
+    \AXC{$\hpP \hpEquiv \hpP'$}
+    \AXC{$\hpP' \hpEval \hpQ'$}
+    \AXC{$\hpQ' \hpEquiv \hpQ$}
+    \TIC{$\hpP \hpEval \hpQ$}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{H}{E-Cong}
+    \AXC{$\hpP \hpEval \hpP'$}
+    \UIC{$\hpEE[\hpP] \hpEval \hpEE[\hpP']$}
+    \DP
+  \end{RuleWithLabel}
+\end{mathpar}

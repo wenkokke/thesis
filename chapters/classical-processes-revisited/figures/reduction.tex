@@ -1,0 +1,67 @@
+\begin{mathpar}
+  \begin{array}{l@{\;}c@{\;}ll}
+    \cpNew(\cpx\cpx')(\cpLink\cpx\cpw\cpPar\cpP)
+     & \cpEval
+     &
+    \cpP\cpSubst{\cpw}{\cpx'}
+     & \RuleLabel{C}{E-Link}
+    \\
+    \cpNew(\cpx\cpx')(
+    \cpSend\cpx\cpy.(\cpP\cpPar\cpQ)
+    \cpPar
+    \cpRecv{\cpx'}{\cpy'}.\cpR
+    )
+     & \cpEval
+     &
+    \cpNew(\cpy\cpy')(
+    \cpP
+    \cpPar
+    \cpNew(\cpx\cpx')(\cpQ\cpPar\cpR)
+    )
+     & \RuleLabel{C}{E-Send}
+    \\
+    \cpNew(\cpx\cpx')(
+    \cpClose\cpx.0
+    \cpPar
+    \cpWait{\cpx'}.\cpQ
+    )
+     & \cpEval
+     &
+    \cpQ
+     & \RuleLabel{C}{E-Close}
+    \\
+    \cpNew(\cpx\cpx')(
+    \cpSelect\cpx<1.\cpP
+    \cpPar
+    \cpOffer{\cpx'}(\cpInl: \cpQ; \cpInr: \cpR)
+    )
+     & \cpEval
+     &
+    \cpNew(\cpx\cpx')(\cpP\cpPar\cpQ)
+     & \RuleLabel{C}[E-Select\textsubscript{1}]{E-Select1}
+    \\
+    \cpNew(\cpx\cpx')(
+    \cpSelect\cpx<2.\cpP
+    \cpPar
+    \cpOffer{\cpx'}(\cpInl: \cpQ; \cpInr: \cpR)
+    )
+     & \cpEval
+     &
+    \cpNew(\cpx\cpx')(\cpP\cpPar\cpR)
+     & \RuleLabel{C}[E-Select\textsubscript{2}]{E-Select2}
+  \end{array}
+
+  \begin{RuleWithLabel}{C}{E-Equiv}
+    \AXC{$\cpP \cpEquiv \cpP'$}
+    \AXC{$\cpP' \cpEval \cpQ'$}
+    \AXC{$\cpQ' \cpEquiv \cpQ$}
+    \TIC{$\cpP \cpEval \cpQ$}
+    \DP
+  \end{RuleWithLabel}
+
+  \begin{RuleWithLabel}{C}{E-Cong}
+    \AXC{$\cpP \cpEval \cpP'$}
+    \UIC{$\cpEE[\cpP] \cpEval \cpEE[\cpP']$}
+    \DP
+  \end{RuleWithLabel}
+\end{mathpar}

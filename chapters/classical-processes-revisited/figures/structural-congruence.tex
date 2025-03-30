@@ -1,0 +1,20 @@
+$\displaystyle
+  \begin{array}{l@{\;}c@{\;}ll}
+    \cpLink\cpx\cpy
+     & \cpEquiv
+     & \cpLink\cpy\cpx
+     & \RuleLabel{C}{SC-LinkComm}
+    \\
+    \cpNew(\cpx\cpx')(\cpP\cpPar\cpQ)
+     & \cpEquiv
+     & \cpNew(\cpx'\cpx)(\cpQ\cpPar\cpP)
+     & \RuleLabel{C}{SC-CutComm}
+    \\
+    \cpNew(\cpx\cpx')(\cpNew(\cpy\cpy')(\cpP\cpPar\cpQ)\cpPar\cpR)
+     & \cpEquiv
+     & \cpNew(\cpy\cpy')(\cpNew(\cpx\cpx')(\cpP\cpPar\cpR)\cpPar\cpQ)
+     & \RuleLabel{C}{SC-CutAssoc}
+    \\
+     & \multicolumn{2}{c}{\text{where }\cpx\notin\cpQ\text{ and }\cpy\notin\cpR}
+  \end{array}
+$

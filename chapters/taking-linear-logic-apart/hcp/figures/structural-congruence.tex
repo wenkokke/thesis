@@ -1,0 +1,45 @@
+$\displaystyle
+  \begin{array}{l@{\;}c@{\;}lll}
+    \hpLink\hpx\hpy
+     & \hpEquiv
+     & \hpLink\hpy\hpx
+     &
+     & \RuleLabel{H}{SC-LinkComm}
+    \\
+    \hpP\hpPar\hpZ
+     & \hpEquiv
+     & \hpP
+     &
+     & \RuleLabel{H}{SC-ParNil}
+    \\
+    \hpP\hpPar\hpQ
+     & \hpEquiv
+     & \hpQ\hpPar\hpP
+     &
+     & \RuleLabel{H}{SC-ParComm}
+    \\
+    \hpP\hpPar\hptm(\hpQ\hpPar\hpR\hptm)
+     & \hpEquiv
+     & \hptm(\hpP\hpPar\hpQ\hptm)\hpPar\hpR
+     &
+     & \RuleLabel{H}{SC-ParAssoc}
+    \\
+    \hpNew(\hpx\hpx')\hpP
+     & \hpEquiv
+     & \hpNew(\hpx'\hpx)\hpP
+     &
+     & \RuleLabel{H}{SC-NewComm}
+    \\
+    \hpNew(\hpx\hpx')\hpNew(\hpy\hpy')\hpP
+     & \hpEquiv
+     & \hpNew(\hpy\hpy')\hpNew(\hpx\hpx')\hpP
+     &
+     & \RuleLabel{H}{SC-NewAssoc}
+    \\
+    \hpNew(\hpx\hpx')(\hpP\hpPar\hpQ)
+     & \hpEquiv
+     & \hpP\hpPar\hpNew(\hpx\hpx')\hpQ
+     & \text{if }\hpx,\hpx'\notin\fn(\hpP)
+     & \RuleLabel{H}{SC-ScopeExt}
+  \end{array}
+$

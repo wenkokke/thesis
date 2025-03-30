@@ -1,0 +1,28 @@
+\begin{center}
+  \begin{tikzpicture}
+    \node (P) at (0,0) {$
+        \cpNew(\cpx\cpx')(
+        \cpClose\cpx.0
+        \cpPar
+        \cpNew(\cpy\cpy')(\cpWait{\cpx'}.\cpQ\cpPar\cpR))
+      $};
+    \node (Q1) [below=2em of P,xshift=-7.5em] {$
+        \cpNew(\cpx\cpx')(
+        \cpClose\cpx.0
+        \cpPar
+        \cpWait{\cpx'}.\cpNew(\cpy\cpy')(\cpQ\cpPar\cpR))
+      $};
+    \node (Q2) [below=2em of P,xshift=+7.5em] {$
+        \cpNew(\cpy\cpy')(
+        \cpNew(\cpx\cpx')(\cpClose\cpx.0\cpPar\cpWait{\cpx'}.\cpQ)
+        \cpPar\cpR)
+      $};
+    \node (R) [below=2em of Q1,xshift=+7.5em] {$
+        \cpNew(\cpy\cpy')(\cpQ\cpPar\cpR)
+      $};
+    \path (P.south) -- node {\rotatebox[origin=c]{215}{$\cpEquiv$}} (Q1.north);
+    \path (P.south) -- node {\rotatebox[origin=c]{325}{$\cpEvalCC$}} (Q2.north);
+    \path (Q1.south) -- node [yshift=-1pt] {\rotatebox[origin=c]{325}{$\cpEval$}} (R.north);
+    \path (Q2.south) -- node {\rotatebox[origin=c]{215}{$\cpEval$}} (R.north);
+  \end{tikzpicture}
+\end{center}
